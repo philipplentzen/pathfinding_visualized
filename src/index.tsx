@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 import "antd/dist/antd.css";
 import {Router} from "./Router";
+import {GlobalStyle} from "./styles/GlobalStyle";
 
 ReactDOM.render(
   <React.StrictMode>
-    <Router />
+      <GlobalStyle />
+      <Router />
   </React.StrictMode>,
   document.getElementById('root')
 );
