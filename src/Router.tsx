@@ -1,5 +1,6 @@
 import React from 'react';
 import {BrowserRouter} from "react-router-dom";
+import {Header} from "./components/Header";
 
 interface IRouterProps {
 
@@ -8,7 +9,7 @@ interface IRouterProps {
 export const Router: React.FC<IRouterProps> = () => {
   return (
       <BrowserRouter>
-          Hello
+          <Header />
       </BrowserRouter>
   );
 };
