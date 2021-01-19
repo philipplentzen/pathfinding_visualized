@@ -1,6 +1,7 @@
 import React from 'react';
 import {BrowserRouter} from "react-router-dom";
-import {Header} from "./components/Header";
+import {AlgorithmPage} from "./pages/AlgorithmPage";
+import {Layout} from "./components/Layout";
 
 interface IRouterProps {
 
@@ -9,7 +10,9 @@ interface IRouterProps {
 export const Router: React.FC<IRouterProps> = () => {
   return (
       <BrowserRouter>
-          <Header />
+          <Layout>
+              <AlgorithmPage />
+          </Layout>
       </BrowserRouter>
   );
 };
