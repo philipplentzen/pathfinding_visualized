@@ -5,12 +5,10 @@ interface IRouterProps {
 
 }
 
-const Router: React.FC<IRouterProps> = () => {
+export const Router: React.FC<IRouterProps> = () => {
   return (
       <BrowserRouter>
           Hello
       </BrowserRouter>
   );
-}
-
-export default Router;
+};
