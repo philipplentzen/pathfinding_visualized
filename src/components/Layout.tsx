@@ -8,9 +8,7 @@ interface ILayoutProps {
 
 const Content = styled.main`
     position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    height: calc(100% - 73px);
 `
 
 export const Layout: React.FC<ILayoutProps> = ({children}) => {
