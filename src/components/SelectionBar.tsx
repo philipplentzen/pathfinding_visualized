@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Space} from "antd";
+import {Button, Divider, Space} from "antd";
 import {DragOutlined, DoubleRightOutlined, LoginOutlined, PlusSquareOutlined, CloseOutlined} from '@ant-design/icons';
 import styled from "styled-components";
 
@@ -8,49 +8,44 @@ interface ISelectionBarProps {
 }
 
 const Container = styled.div`
-  display: flex;
-  justify-content: space-between;
-        
-  position: absolute;
-  top: 36px;
-  left: 36px;
-  right: 36px;
-  
-  padding: 12px;
-  
-  box-shadow: var(--shadow);
-  background-color: #FFF;
+    display: flex;
+    justify-content: space-between;
+    
+    width: 100%;
+    
+    padding: 8px 64px;
+    background-color: var(--background-dark);
 `
 
 export const SelectionBar: React.FC<ISelectionBarProps> = () => {
     return (
         <Container>
-            <Space size="middle">
-                <Button type="primary"
-                        size="large"
+            <Space split={<Divider type="vertical" />}>
+                <Button type="link"
+                        size="small"
                         icon={<DragOutlined />}>
                     Drag
                 </Button>
-                <Button type="default"
-                        size="large"
+                <Button type="text"
+                        size="small"
                         icon={<DoubleRightOutlined />}>
                     Start
                 </Button>
-                <Button type="default"
-                        size="large"
+                <Button type="text"
+                        size="small"
                         icon={<LoginOutlined />}>
                     Target
                 </Button>
-                <Button type="default"
-                        size="large"
+                <Button type="text"
+                        size="small"
                         icon={<PlusSquareOutlined />}>
                     Walls
                 </Button>
             </Space>
             <Space>
-                <Button type="primary"
+                <Button type="text"
                         danger
-                        size="large"
+                        size="small"
                         icon={<CloseOutlined />}>
                     Clear All
                 </Button>
