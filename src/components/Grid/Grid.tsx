@@ -53,7 +53,8 @@ const GridCell = styled.div`
   }
   
   &.wall {
-    background-color: lightpink;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.85);
     transition: transform ease 300ms;
     transform: scale(1);
   }
@@ -69,6 +70,7 @@ const GridCell = styled.div`
 
 export const Grid: React.FC<IGridProps> = () => {
     const [grid, setGrid] = useState<Node[][]>([[]]);
+    const isPressed = useRef(false);
     const isDrawing = useRef(false);
 
     let nodesToUpdate = useRef<[number, number, Node][]>([]);
@@ -88,7 +90,8 @@ export const Grid: React.FC<IGridProps> = () => {
             case EditMode.WALLS: {
                 const isPresent = event.currentTarget.classList.toggle("wall");
                 nodesToUpdate.current.push([row, column, isPresent ? new WallNode() : new EmptyNode()]);
-                isDrawing.current = true;
+                isPressed.current = true;
+                isDrawing.current = isPresent;
                 break;
             }
             case EditMode.START: {
@@ -112,11 +115,15 @@ export const Grid: React.FC<IGridProps> = () => {
 
     const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>,row: number, column: number) => {
         event.preventDefault();
-        if (isDrawing.current) {
+        if (isPressed.current) {
             switch (EditModeHandler.editMode) {
                 case EditMode.WALLS: {
-                    const isPresent = event.currentTarget.classList.toggle("wall");
-                    nodesToUpdate.current.push([row, column, isPresent ? new WallNode() : new EmptyNode()]);
+                    if (isDrawing.current) {
+                        event.currentTarget.classList.add("wall");
+                    } else {
+                        event.currentTarget.classList.remove("wall");
+                    }
+                    nodesToUpdate.current.push([row, column, isDrawing.current ? new WallNode() : new EmptyNode()]);
                     break;
                 }
             }
@@ -133,7 +140,7 @@ export const Grid: React.FC<IGridProps> = () => {
                     })
                     return newGrid;
                 }));
-                isDrawing.current = false;
+                isPressed.current = false;
                 break;
         }
     }, []);
@@ -150,7 +157,7 @@ export const Grid: React.FC<IGridProps> = () => {
                                       onMouseUp={(event) => handleMouseUp(event)}>
                                 {node instanceof WallNode && "1"}
                                 {node instanceof StartNode && <DoubleRightOutlined />}
-                                {node instanceof StartNode && <LoginOutlined />}
+                                {node instanceof TargetNode && <LoginOutlined />}
                             </GridCell>
                         ))}
                     </GridRow>
