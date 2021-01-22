@@ -9,61 +9,16 @@ import {EditModeHandler} from "../../classes/EditModeHandler";
 import {TargetNode} from "../../classes/node/TargetNode";
 import produce from "immer";
 import {DoubleRightOutlined, LoginOutlined} from "@ant-design/icons";
+import {IGridRefs} from "../../types/IRefs";
+import {GridContainer} from "./GridContainer";
+import { GridRow } from "./GridRow";
+import { GridCell } from "./GridCell";
 
-export interface IGridProps {
+interface IGridProps {
 
 }
 
-const pixelSize = 16;
-
-const GridContainer = styled.div`
-    display: table;
-    border-collapse: collapse;
-    margin: auto;
-    width: 100%;
-    height: calc(100% - 40px);
-`
-
-const GridRow = styled.div`
-    display: table-row;
-    box-sizing: border-box;
-`
-const GridCell = styled.div`
-  position: relative;
-  display: table-cell;
-  width: ${pixelSize}px;
-  height: ${pixelSize}px;
-  
-  font-size: 11px;
-  line-height: 15px;
-  text-align: center;
-  
-  box-sizing: border-box;
-  border: 1px solid #dddddd;
-  cursor: pointer;
-
-  transform: scale(0);
-  
-  transition: all ease 300ms;
-
-  &:hover {
-    transform: scale(1);
-    transition: none;
-    background-color: #40a9ff;
-  }
-  
-  &.wall {
-    color: white;
-    background-color: rgba(0, 0, 0, 0.85);
-    transition: transform ease 300ms;
-    transform: scale(1);
-  }
-  
-  &.start, &.target  {
-    transform: scale(1);
-  }
-`
-
+export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
 export const Grid: React.FC<IGridProps> = () => {
     const [grid, setGrid] = useState<Node[][]>([[]]);
     const isPressed = useRef(false);
@@ -71,6 +26,8 @@ export const Grid: React.FC<IGridProps> = () => {
     const nodesToUpdate = useMemo<[number, number, Node][]>(() => {
         return [];
     }, undefined);
+
+    const pixelSize = 16;
 
     const clearGrid = useCallback(() => {
         console.log("clear");
@@ -165,6 +122,7 @@ export const Grid: React.FC<IGridProps> = () => {
                     <GridRow key={rowId}>
                         {nodes.map((node, columnId) => (
                             <GridCell key={rowId + "-" + columnId}
+                                      pixelSize={pixelSize}
                                       className={node.toString()}
                                       onMouseDown={(event) => handleMouseDown(event, rowId, columnId)}
                                       onMouseOver={(event) => handleMouseOver(event, rowId, columnId)}
