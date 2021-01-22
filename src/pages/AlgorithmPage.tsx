@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {useCallback, useRef} from "react";
 import {Grid} from "../components/Grid/Grid";
 import {SelectionBar} from "../components/SelectionBar";
 import {Legend} from "../components/Legend";
@@ -15,21 +15,21 @@ export const AlgorithmPage: React.FC<IAlgorithmPageProps> = () => {
     const settingsRef = useRef<ISettingsRefs>(null);
     const legendRef = useRef<ILegendRefs>(null)
 
-    const handleClear = () => {
+    const handleClear = useCallback(() => {
         gridRef.current?.clearGrid();
-    }
+    }, []);
 
-    const handleChangeEditMode = (editMode: EditMode) => {
+    const handleChangeEditMode = useCallback((editMode: EditMode) => {
         gridRef.current?.changeEditMode(editMode);
-    }
+    }, []);
 
-    const handleOpenSettings = () => {
+    const handleOpenSettings = useCallback(() => {
         settingsRef.current?.showSettings();
-    }
+    }, []);
 
-    const handleToggleLegend = () => {
+    const handleToggleLegend = useCallback(() => {
         legendRef.current?.toggleLegend();
-    }
+    }, []);
 
     return (
         <>
