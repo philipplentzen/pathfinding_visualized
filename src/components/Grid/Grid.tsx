@@ -1,18 +1,18 @@
 import React, {forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState} from "react";
-import styled from "styled-components";
 import {EditMode} from "../../types/EditMode";
 import {EmptyNode} from "../../classes/node/EmptyNode";
 import {Node} from "../../classes/node/Node";
 import {WallNode} from "../../classes/node/WallNode";
 import {StartNode} from "../../classes/node/StartNode";
-import {EditModeHandler} from "../../classes/EditModeHandler";
 import {TargetNode} from "../../classes/node/TargetNode";
 import produce from "immer";
 import {DoubleRightOutlined, LoginOutlined} from "@ant-design/icons";
 import {IGridRefs} from "../../types/IRefs";
+import {GridTable} from "./GridTable";
+import {GridRow} from "./GridRow";
+import {GridCell} from "./GridCell";
 import {GridContainer} from "./GridContainer";
-import { GridRow } from "./GridRow";
-import { GridCell } from "./GridCell";
+import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
 
 interface IGridProps {
 
@@ -20,6 +20,7 @@ interface IGridProps {
 
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
     const [grid, setGrid] = useState<Node[][]>([[]]);
+    const [editMode, setEditMode] = useState(EditMode.DRAG);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
     const nodesToUpdate = useMemo<[number, number, Node][]>(() => {
@@ -31,11 +32,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     useImperativeHandle(refs, () => {
         return {
             clearGrid,
+            changeEditMode,
         }
     });
 
     const clearGrid = useCallback(() => {
-        console.log("clear");
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
             oldGrid.forEach((row, rowId) => {
                 row.forEach((node, colId) => {
@@ -44,6 +45,10 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             });
             return newGrid;
         }));
+    }, []);
+
+    const changeEditMode = useCallback((editMode: EditMode) => {
+        setEditMode(editMode);
     }, []);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
@@ -57,7 +62,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
     const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();
-        switch (EditModeHandler.editMode) {
+        switch (editMode) {
             case EditMode.WALLS: {
                 const isPresent = event.currentTarget.classList.toggle("wall");
                 nodesToUpdate.push([row, column, isPresent ? new WallNode() : new EmptyNode()]);
@@ -87,7 +92,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>,row: number, column: number) => {
         event.preventDefault();
         if (isPressed.current) {
-            switch (EditModeHandler.editMode) {
+            switch (editMode) {
                 case EditMode.WALLS: {
                     if (isDrawing.current) {
                         event.currentTarget.classList.add("wall");
@@ -103,7 +108,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
     const handleMouseUp = useCallback( (event: React.MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
-        switch (EditModeHandler.editMode) {
+        switch (editMode) {
             case EditMode.WALLS:
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
                     nodesToUpdate.forEach(([row, column, node]) => {
@@ -117,25 +122,30 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     }, [nodesToUpdate]);
 
     return (
-        <>
-            <GridContainer ref={buildGrid}>
-                {grid.map((nodes, rowId) => (
-                    <GridRow key={rowId}>
-                        {nodes.map((node, columnId) => (
-                            <GridCell key={rowId + "-" + columnId}
-                                      pixelSize={pixelSize}
-                                      className={node.toString()}
-                                      onMouseDown={(event) => handleMouseDown(event, rowId, columnId)}
-                                      onMouseOver={(event) => handleMouseOver(event, rowId, columnId)}
-                                      onMouseUp={(event) => handleMouseUp(event)}>
-                                {node instanceof StartNode && <DoubleRightOutlined />}
-                                {node instanceof TargetNode && <LoginOutlined />}
-                            </GridCell>
+        <GridContainer ref={buildGrid}>
+            <TransformWrapper wheel={{step: 200}}
+                              options={{disabled: editMode !== EditMode.DRAG}}>
+                <TransformComponent>
+                    <GridTable>
+                        {grid.map((nodes, rowId) => (
+                            <GridRow key={rowId}>
+                                {nodes.map((node, columnId) => (
+                                    <GridCell key={rowId + "-" + columnId}
+                                              pixelSize={pixelSize}
+                                              className={node.toString()}
+                                              onMouseDown={(event) => handleMouseDown(event, rowId, columnId)}
+                                              onMouseOver={(event) => handleMouseOver(event, rowId, columnId)}
+                                              onMouseUp={(event) => handleMouseUp(event)}>
+                                        {node instanceof StartNode && <DoubleRightOutlined />}
+                                        {node instanceof TargetNode && <LoginOutlined />}
+                                    </GridCell>
+                                ))}
+                            </GridRow>
                         ))}
-                    </GridRow>
-                ))}
-            </GridContainer>
-        </>
+                    </GridTable>
+                </TransformComponent>
+            </TransformWrapper>
+        </GridContainer>
     )
 })
 

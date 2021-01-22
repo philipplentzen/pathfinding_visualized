@@ -8,6 +8,7 @@ import {EditModeHandler} from "../classes/EditModeHandler";
 interface ISelectionBarProps {
     onClear: () => void;
     onShowSettings: () => void;
+    onChangeEditMode: (editMode: EditMode) => void;
 }
 
 const Container = styled.div`
@@ -20,11 +21,11 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onShowSettings}) => {
+export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onShowSettings, onChangeEditMode}) => {
     const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
 
     const handleEditModeChange = (editMode: EditMode) => {
-        EditModeHandler.editMode = editMode;
+        onChangeEditMode(editMode);
         setEditMode(editMode);
     }
 

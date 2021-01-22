@@ -4,6 +4,7 @@ import {SelectionBar} from "../components/SelectionBar";
 import {Legend} from "../components/Legend";
 import {Settings} from "../components/Settings";
 import {IGridRefs, ILegendRefs, ISettingsRefs} from "../types/IRefs";
+import {EditMode} from "../types/EditMode";
 
 interface IAlgorithmPageProps {
 
@@ -14,8 +15,12 @@ export const AlgorithmPage: React.FC<IAlgorithmPageProps> = () => {
     const settingsRef = useRef<ISettingsRefs>(null);
     const legendRef = useRef<ILegendRefs>(null)
 
-    const handleOnClear = () => {
+    const handleClear = () => {
         gridRef.current?.clearGrid();
+    }
+
+    const handleChangeEditMode = (editMode: EditMode) => {
+        gridRef.current?.changeEditMode(editMode);
     }
 
     const handleOpenSettings = () => {
@@ -28,7 +33,9 @@ export const AlgorithmPage: React.FC<IAlgorithmPageProps> = () => {
 
     return (
         <>
-            <SelectionBar onClear={handleOnClear} onShowSettings={handleOpenSettings} />
+            <SelectionBar onClear={handleClear}
+                          onShowSettings={handleOpenSettings}
+                          onChangeEditMode={handleChangeEditMode} />
             <Grid ref={gridRef} />
             <Legend ref={legendRef} />
             <Settings ref={settingsRef} onShowLegend={handleToggleLegend} />
