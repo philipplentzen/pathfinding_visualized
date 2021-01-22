@@ -1,6 +1,7 @@
 import React from "react";
-import {Typography} from "antd";
+import {Button, Divider, Select, Space, Typography} from "antd";
 import styled from "styled-components";
+import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
 
 interface IHeaderProps {
 
@@ -26,6 +27,14 @@ export const Header: React.FC<IHeaderProps> = () => {
     return (
         <HeaderContainer>
             <Typography.Title level={3} style={{marginBottom: 0}}>Pathfinding Visualized</Typography.Title>
+            <Space split={<Divider type="vertical" />}>
+                <Select placeholder="Select algorithm" style={{width: 200}} size="large">
+                    {Object.entries(PathfindingAlgorithms).map(([key, algorithm]) => (
+                        <Select.Option value={key} key={key}>{algorithm}</Select.Option>
+                    ))}
+                </Select>
+                <Button type="primary" size="large" style={{width: 100}}>Run!</Button>
+            </Space>
         </HeaderContainer>
     );
 }
