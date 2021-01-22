@@ -3,5 +3,9 @@ export interface IGridRefs {
 }
 
 export interface ISettingsRefs {
-    openSettings: () => void;
+    showSettings: () => void;
+}
+
+export interface ILegendRefs {
+    toggleLegend: () => void;
 }

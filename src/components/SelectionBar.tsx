@@ -7,7 +7,7 @@ import {EditModeHandler} from "../classes/EditModeHandler";
 
 interface ISelectionBarProps {
     onClear: () => void;
-    onOpenSettings: () => void;
+    onShowSettings: () => void;
 }
 
 const Container = styled.div`
@@ -20,7 +20,7 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onOpenSettings}) => {
+export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onShowSettings}) => {
     const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
 
     const handleEditModeChange = (editMode: EditMode) => {
@@ -66,7 +66,7 @@ export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onOpenSetti
                 </Button>
                 <Button type="text"
                         size="small"
-                        onClick={onOpenSettings}
+                        onClick={onShowSettings}
                         icon={<SettingOutlined />} />
             </Space>
         </Container>
