@@ -1,12 +1,13 @@
 import React, {useState} from "react";
 import {Button, Divider, Space} from "antd";
-import {CloseOutlined, DoubleRightOutlined, DragOutlined, LoginOutlined, PlusSquareOutlined} from '@ant-design/icons';
+import {CloseOutlined, DoubleRightOutlined, DragOutlined, LoginOutlined, PlusSquareOutlined, SettingOutlined} from '@ant-design/icons';
 import styled from "styled-components";
 import {EditMode} from "../types/EditMode";
 import {EditModeHandler} from "../classes/EditModeHandler";
 
 interface ISelectionBarProps {
-
+    onClear: () => void;
+    onOpenSettings: () => void;
 }
 
 const Container = styled.div`
@@ -19,7 +20,7 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.FC<ISelectionBarProps> = () => {
+export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onOpenSettings}) => {
     const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
 
     const handleEditModeChange = (editMode: EditMode) => {
@@ -55,14 +56,18 @@ export const SelectionBar: React.FC<ISelectionBarProps> = () => {
                     Walls
                 </Button>
             </Space>
-            <Space>
+            <Space split={<Divider type="vertical" />}>
                 <Button type="text"
                         danger
                         size="small"
-                        onClick={() => EditModeHandler.clearGrid()}
+                        onClick={onClear}
                         icon={<CloseOutlined />}>
                     Clear All
                 </Button>
+                <Button type="text"
+                        size="small"
+                        onClick={onOpenSettings}
+                        icon={<SettingOutlined />} />
             </Space>
         </Container>
     )

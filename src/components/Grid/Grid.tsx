@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState} from "react";
 import styled from "styled-components";
 import {EditMode} from "../../types/EditMode";
 import {EmptyNode} from "../../classes/node/EmptyNode";
@@ -19,7 +19,6 @@ interface IGridProps {
 }
 
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
-export const Grid: React.FC<IGridProps> = () => {
     const [grid, setGrid] = useState<Node[][]>([[]]);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
@@ -28,6 +27,12 @@ export const Grid: React.FC<IGridProps> = () => {
     }, undefined);
 
     const pixelSize = 16;
+
+    useImperativeHandle(refs, () => {
+        return {
+            clearGrid,
+        }
+    });
 
     const clearGrid = useCallback(() => {
         console.log("clear");
@@ -40,10 +45,6 @@ export const Grid: React.FC<IGridProps> = () => {
             return newGrid;
         }));
     }, []);
-
-    useEffect(() => {
-        EditModeHandler.clearGrid = clearGrid;
-    }, [clearGrid]);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
@@ -136,5 +137,5 @@ export const Grid: React.FC<IGridProps> = () => {
             </GridContainer>
         </>
     )
-}
+})
 
