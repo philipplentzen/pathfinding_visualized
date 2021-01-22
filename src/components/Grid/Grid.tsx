@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import styled from "styled-components";
 import {EditMode} from "../../types/EditMode";
 import {EmptyNode} from "../../classes/node/EmptyNode";
@@ -59,11 +59,7 @@ const GridCell = styled.div`
     transform: scale(1);
   }
   
-  &.start {
-    transform: scale(1);
-  }
-  
-  &.target {
+  &.start, &.target  {
     transform: scale(1);
   }
 `
@@ -72,8 +68,25 @@ export const Grid: React.FC<IGridProps> = () => {
     const [grid, setGrid] = useState<Node[][]>([[]]);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
+    const nodesToUpdate = useMemo<[number, number, Node][]>(() => {
+        return [];
+    }, undefined);
 
-    let nodesToUpdate = useRef<[number, number, Node][]>([]);
+    const clearGrid = useCallback(() => {
+        console.log("clear");
+        setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+            oldGrid.forEach((row, rowId) => {
+                row.forEach((node, colId) => {
+                    newGrid[rowId][colId] = new EmptyNode();
+                });
+            });
+            return newGrid;
+        }));
+    }, []);
+
+    useEffect(() => {
+        EditModeHandler.clearGrid = clearGrid;
+    }, [clearGrid]);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
@@ -89,7 +102,7 @@ export const Grid: React.FC<IGridProps> = () => {
         switch (EditModeHandler.editMode) {
             case EditMode.WALLS: {
                 const isPresent = event.currentTarget.classList.toggle("wall");
-                nodesToUpdate.current.push([row, column, isPresent ? new WallNode() : new EmptyNode()]);
+                nodesToUpdate.push([row, column, isPresent ? new WallNode() : new EmptyNode()]);
                 isPressed.current = true;
                 isDrawing.current = isPresent;
                 break;
@@ -111,7 +124,7 @@ export const Grid: React.FC<IGridProps> = () => {
                 break;
             }
         }
-    }, []);
+    }, [nodesToUpdate]);
 
     const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>,row: number, column: number) => {
         event.preventDefault();
@@ -123,39 +136,39 @@ export const Grid: React.FC<IGridProps> = () => {
                     } else {
                         event.currentTarget.classList.remove("wall");
                     }
-                    nodesToUpdate.current.push([row, column, isDrawing.current ? new WallNode() : new EmptyNode()]);
+                    nodesToUpdate.push([row, column, isDrawing.current ? new WallNode() : new EmptyNode()]);
                     break;
                 }
             }
         }
-    }, []);
+    }, [nodesToUpdate]);
 
-    const handleMouseUp = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseUp = useCallback( (event: React.MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
         switch (EditModeHandler.editMode) {
             case EditMode.WALLS:
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    nodesToUpdate.current.forEach(([row, column, node]) => {
+                    nodesToUpdate.forEach(([row, column, node]) => {
                         newGrid[row][column] = node;
-                    })
+                    });
                     return newGrid;
                 }));
                 isPressed.current = false;
                 break;
         }
-    }, []);
+    }, [nodesToUpdate]);
 
     return (
         <>
             <GridContainer ref={buildGrid}>
-                {grid.map((row, rowId) => (
+                {grid.map((nodes, rowId) => (
                     <GridRow key={rowId}>
-                        {row.map((node, columnId) => (
+                        {nodes.map((node, columnId) => (
                             <GridCell key={rowId + "-" + columnId}
+                                      className={node.toString()}
                                       onMouseDown={(event) => handleMouseDown(event, rowId, columnId)}
                                       onMouseOver={(event) => handleMouseOver(event, rowId, columnId)}
                                       onMouseUp={(event) => handleMouseUp(event)}>
-                                {node instanceof WallNode && "1"}
                                 {node instanceof StartNode && <DoubleRightOutlined />}
                                 {node instanceof TargetNode && <LoginOutlined />}
                             </GridCell>

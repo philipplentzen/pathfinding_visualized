@@ -59,6 +59,7 @@ export const SelectionBar: React.FC<ISelectionBarProps> = () => {
                 <Button type="text"
                         danger
                         size="small"
+                        onClick={() => EditModeHandler.clearGrid()}
                         icon={<CloseOutlined />}>
                     Clear All
                 </Button>
