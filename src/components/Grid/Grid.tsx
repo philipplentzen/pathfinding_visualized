@@ -23,6 +23,8 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const [editMode, setEditMode] = useState(EditMode.DRAG);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
+    const startNode = useRef<Node>(new EmptyNode(0, 0));
+    const targetNode = useRef<Node>(new EmptyNode(0, 0));
     const nodesToUpdate = useMemo<[number, number, Node][]>(() => {
         return [];
     }, undefined);
@@ -40,10 +42,9 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
             oldGrid.forEach((row, rowId) => {
                 row.forEach((node, colId) => {
-                    newGrid[rowId][colId] = new EmptyNode();
+                    newGrid[rowId][colId] = new EmptyNode(rowId, colId);
                 });
             });
-            return newGrid;
         }));
     }, []);
 
@@ -56,7 +57,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             const rows: number = Math.floor(element.clientHeight / pixelSize);
             const cols: number = Math.floor(element.clientWidth / pixelSize);
 
-            setGrid(Array.from(Array(rows), () => Array.from(Array(cols), () => new EmptyNode())));
+            setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }
     }, []);
 
@@ -65,7 +66,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         switch (editMode) {
             case EditMode.WALLS: {
                 const isPresent = event.currentTarget.classList.toggle("wall");
-                nodesToUpdate.push([row, column, isPresent ? new WallNode() : new EmptyNode()]);
+                nodesToUpdate.push([row, column, isPresent ? new WallNode(row, column) : new EmptyNode(row, column)]);
                 isPressed.current = true;
                 isDrawing.current = isPresent;
                 break;
@@ -73,23 +74,23 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             case EditMode.START: {
                 const isPresent = event.currentTarget.classList.toggle("start");
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    newGrid[row][column] = isPresent ? new StartNode() : new EmptyNode();
-                    return newGrid;
+                    newGrid[row][column] = isPresent ? new StartNode(row, column) : new EmptyNode(row, column);
                 }));
+                startNode.current = grid[row][column];
                 break;
             }
             case EditMode.TARGET: {
                 const isPresent = event.currentTarget.classList.toggle("target");
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    newGrid[row][column] = isPresent ? new TargetNode() : new EmptyNode();
-                    return newGrid;
+                    newGrid[row][column] = isPresent ? new TargetNode(row, column) : new EmptyNode(row, column);
                 }));
+                targetNode.current = grid[row][column];
                 break;
             }
         }
-    }, [nodesToUpdate]);
+    }, [nodesToUpdate, editMode]);
 
-    const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>,row: number, column: number) => {
+    const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();
         if (isPressed.current) {
             switch (editMode) {
@@ -99,12 +100,12 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                     } else {
                         event.currentTarget.classList.remove("wall");
                     }
-                    nodesToUpdate.push([row, column, isDrawing.current ? new WallNode() : new EmptyNode()]);
+                    nodesToUpdate.push([row, column, isDrawing.current ? new WallNode(row, column) : new EmptyNode(row, column)]);
                     break;
                 }
             }
         }
-    }, [nodesToUpdate]);
+    }, [nodesToUpdate, editMode]);
 
     const handleMouseUp = useCallback( (event: React.MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -114,12 +115,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                     nodesToUpdate.forEach(([row, column, node]) => {
                         newGrid[row][column] = node;
                     });
-                    return newGrid;
                 }));
                 isPressed.current = false;
                 break;
         }
-    }, [nodesToUpdate]);
+    }, [nodesToUpdate, editMode]);
 
     return (
         <GridContainer ref={buildGrid}>
@@ -129,12 +129,13 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                     <GridTable>
                         {grid.map((nodes, rowId) => (
                             <GridRow key={rowId}>
-                                {nodes.map((node, columnId) => (
-                                    <GridCell key={rowId + "-" + columnId}
+                                {nodes.map((node) => (
+                                    <GridCell key={node.getRow() + "-" + node.getColumn()}
                                               pixelSize={pixelSize}
                                               className={node.toString()}
-                                              onMouseDown={(event) => handleMouseDown(event, rowId, columnId)}
-                                              onMouseOver={(event) => handleMouseOver(event, rowId, columnId)}
+                                              id={node.getRow() + "-" + node.getColumn()}
+                                              onMouseDown={(event) => handleMouseDown(event, node.getRow(), node.getColumn())}
+                                              onMouseOver={(event) => handleMouseOver(event, node.getRow(), node.getColumn())}
                                               onMouseUp={(event) => handleMouseUp(event)}>
                                         {node instanceof StartNode && <DoubleRightOutlined />}
                                         {node instanceof TargetNode && <LoginOutlined />}
