@@ -1,6 +1,11 @@
 import {createGlobalStyle} from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
+  @keyframes test {
+    from {transform: scale(0)}
+    to {transform: scale(1)}
+  }
+        
   :root {
     --background: #ffffff;
     --background-dark: #fafafa;
