@@ -13,10 +13,19 @@ import {GridRow} from "./GridRow";
 import {GridCell} from "./GridCell";
 import {GridContainer} from "./GridContainer";
 import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
+import {BreadthNode} from "../../classes/node/BreadthNode";
+import {BreadthFirstAlgorithm} from "../../classes/algorithm/BreadthFirstAlgorithm";
 
 interface IGridProps {
 
 }
+
+const operations = [
+    [-1, 0],
+    [0, 1],
+    [1, 0],
+    [0, -1]
+];
 
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
     const [grid, setGrid] = useState<Node[][]>([[]]);
@@ -25,7 +34,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const isDrawing = useRef(false);
     const startNode = useRef<Node>(new EmptyNode(0, 0));
     const targetNode = useRef<Node>(new EmptyNode(0, 0));
-    const nodesToUpdate = useMemo<[number, number, Node][]>(() => {
+    const nodesToUpdate = useMemo<Node[]>(() => {
         return [];
     }, undefined);
 
@@ -66,25 +75,27 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         switch (editMode) {
             case EditMode.WALLS: {
                 const isPresent = event.currentTarget.classList.toggle("wall");
-                nodesToUpdate.push([row, column, isPresent ? new WallNode(row, column) : new EmptyNode(row, column)]);
+                nodesToUpdate.push(isPresent ? new WallNode(row, column) : new EmptyNode(row, column));
                 isPressed.current = true;
                 isDrawing.current = isPresent;
                 break;
             }
             case EditMode.START: {
                 const isPresent = event.currentTarget.classList.toggle("start");
+                const newNode = isPresent ? new StartNode(row, column) : new EmptyNode(row, column);
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    newGrid[row][column] = isPresent ? new StartNode(row, column) : new EmptyNode(row, column);
+                    newGrid[row][column] = newNode;
                 }));
-                startNode.current = grid[row][column];
+                startNode.current = newNode;
                 break;
             }
             case EditMode.TARGET: {
                 const isPresent = event.currentTarget.classList.toggle("target");
+                const newNode = isPresent ? new TargetNode(row, column) : new EmptyNode(row, column);
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    newGrid[row][column] = isPresent ? new TargetNode(row, column) : new EmptyNode(row, column);
+                    newGrid[row][column] = newNode;
                 }));
-                targetNode.current = grid[row][column];
+                targetNode.current = newNode;
                 break;
             }
         }
@@ -100,7 +111,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                     } else {
                         event.currentTarget.classList.remove("wall");
                     }
-                    nodesToUpdate.push([row, column, isDrawing.current ? new WallNode(row, column) : new EmptyNode(row, column)]);
+                    nodesToUpdate.push(isDrawing.current ? new WallNode(row, column) : new EmptyNode(row, column));
                     break;
                 }
             }
@@ -112,8 +123,8 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         switch (editMode) {
             case EditMode.WALLS:
                 setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    nodesToUpdate.forEach(([row, column, node]) => {
-                        newGrid[row][column] = node;
+                    nodesToUpdate.forEach((node) => {
+                        newGrid[node.getRow()][node.getColumn()] = node;
                     });
                 }));
                 isPressed.current = false;
@@ -130,10 +141,10 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                         {grid.map((nodes, rowId) => (
                             <GridRow key={rowId}>
                                 {nodes.map((node) => (
-                                    <GridCell key={node.getRow() + "-" + node.getColumn()}
+                                    <GridCell key={node.getId()}
                                               pixelSize={pixelSize}
                                               className={node.toString()}
-                                              id={node.getRow() + "-" + node.getColumn()}
+                                              id={node.getId()}
                                               onMouseDown={(event) => handleMouseDown(event, node.getRow(), node.getColumn())}
                                               onMouseOver={(event) => handleMouseOver(event, node.getRow(), node.getColumn())}
                                               onMouseUp={(event) => handleMouseUp(event)}>

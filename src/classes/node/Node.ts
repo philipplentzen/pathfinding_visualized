@@ -15,5 +15,9 @@ export abstract class Node {
         return this.column;
     }
 
+    public getId(): string {
+        return this.row + "-" + this.column;
+    }
+
     public abstract toString(): string;
 }
