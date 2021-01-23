@@ -1,12 +1,12 @@
 import React, {useState} from "react";
 import {Button, Divider, Space} from "antd";
-import {CloseOutlined, DoubleRightOutlined, DragOutlined, LoginOutlined, PlusSquareOutlined, SettingOutlined} from '@ant-design/icons';
+import {CloseOutlined, DoubleRightOutlined, DragOutlined, LoginOutlined, PlusSquareOutlined, SettingOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {EditMode} from "../types/EditMode";
 import {EditModeHandler} from "../classes/EditModeHandler";
 
 interface ISelectionBarProps {
-    onClear: () => void;
+    onClickClear: () => void;
     onShowSettings: () => void;
     onChangeEditMode: (editMode: EditMode) => void;
 }
@@ -21,7 +21,7 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onShowSettings, onChangeEditMode}) => {
+export const SelectionBar: React.FC<ISelectionBarProps> = ({onClickClear, onShowSettings, onChangeEditMode}) => {
     const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
 
     const handleEditModeChange = (editMode: EditMode) => {
@@ -61,7 +61,7 @@ export const SelectionBar: React.FC<ISelectionBarProps> = ({onClear, onShowSetti
                 <Button type="text"
                         danger
                         size="small"
-                        onClick={onClear}
+                        onClick={onClickClear}
                         icon={<CloseOutlined />}>
                     Clear All
                 </Button>

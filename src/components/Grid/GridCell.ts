@@ -34,15 +34,19 @@ export const GridCell = styled.div<IGridCellProps>`
     transition: transform ease 300ms;
   }
   
-  &.start, &.target, &.wall, &.visited, &.listed {
-    transform: scale(1);
-  }
-  
-  &.listed {
+  &.queued {
     background-color: seagreen;
   }
   
   &.visited {
     background-color: lightpink;
+  }
+
+  &.shortest {
+    background-color: tomato;
+  }
+
+  &.start, &.target, &.wall, &.queued, &.visited, &.shortest {
+    transform: scale(1);
   }
 `

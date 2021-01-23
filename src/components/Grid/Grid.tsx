@@ -13,22 +13,17 @@ import {GridRow} from "./GridRow";
 import {GridCell} from "./GridCell";
 import {GridContainer} from "./GridContainer";
 import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
-import {BreadthNode} from "../../classes/node/BreadthNode";
 import {BreadthFirstAlgorithm} from "../../classes/algorithm/BreadthFirstAlgorithm";
+import * as _ from "lodash";
+import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
+import {notification} from "antd";
 
 interface IGridProps {
-
+    onPathfindingFinished: () => void;
 }
 
-const operations = [
-    [-1, 0],
-    [0, 1],
-    [1, 0],
-    [0, -1]
-];
-
-export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
-    const [grid, setGrid] = useState<Node[][]>([[]]);
+export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
+    const [grid, setGrid] = useState<Node[][]>([]);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
@@ -42,57 +37,42 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
     useImperativeHandle(refs, () => {
         return {
+            runPathfinding,
             clearGrid,
             changeEditMode,
         }
     });
 
-    const runSimulation = useCallback( (queue: Node[]) => {
-        if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode) || queue.length <= 0) {
+    const runPathfinding = useCallback( async (algorithm: PathfindingAlgorithms) => {
+        if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode)) {
             return;
         }
-
-        const currentNode = queue.shift()!;
-        const row = currentNode.getRow();
-        const column = currentNode.getColumn();
-        document.getElementById(currentNode.getId())?.classList.add("visited");
-
-        if (currentNode === targetNode.current) {
-            return;
+        let newGrid: Node[][] = [];
+        console.log(algorithm);
+        switch (algorithm) {
+            case PathfindingAlgorithms.BREADTH:
+                newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
         }
-
-        operations.forEach(([dRow, dColumn]) => {
-            const newRow = row + dRow;
-            const newColumn = column + dColumn;
-            const newCell = document.getElementById(newRow + "-" + newColumn);
-            if (currentNode === startNode.current) {
-                queue.push(new BreadthNode(newRow, newColumn, currentNode, 1));
-            } else if (currentNode instanceof BreadthNode && newCell !== null) {
-                if (newCell.classList.contains("empty")) {
-                    queue.push(new BreadthNode(newRow, newColumn, currentNode, currentNode.length));
-                }
-                if (newCell.classList.contains("target")) {
-                    queue.push(grid[newRow][newColumn]);
-                }
-                newCell.classList.remove("empty");
-                newCell.classList.add("listed");
-            }
-        });
-
-
-        setTimeout(() => runSimulation(queue), 0);
-    }, [grid]);
+        if (newGrid !== []) {
+            console.log(newGrid);
+            setGrid(newGrid);
+        } else {
+            notification.error({
+                message: "Pathfinding Failed!"
+            });
+        }
+        onPathfindingFinished();
+    }, [grid, onPathfindingFinished]);
 
     const clearGrid = useCallback(() => {
-        // setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-        //     oldGrid.forEach((row, rowId) => {
-        //         row.forEach((node, colId) => {
-        //             newGrid[rowId][colId] = new EmptyNode(rowId, colId);
-        //         });
-        //     });
-        // }));
-        runSimulation([startNode.current]);
-    }, [runSimulation]);
+        setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+            oldGrid.forEach((row, rowId) => {
+                row.forEach((node, colId) => {
+                    newGrid[rowId][colId] = new EmptyNode(rowId, colId);
+                });
+            });
+        }));
+    }, []);
 
     const changeEditMode = useCallback((editMode: EditMode) => {
         setEditMode(editMode);

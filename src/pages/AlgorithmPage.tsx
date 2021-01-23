@@ -1,19 +1,30 @@
-import React, {useCallback, useRef} from "react";
+import React, {forwardRef, useCallback, useImperativeHandle, useRef} from "react";
 import {Grid} from "../components/Grid/Grid";
 import {SelectionBar} from "../components/SelectionBar";
 import {Legend} from "../components/Legend";
 import {Settings} from "../components/Settings";
-import {IGridRefs, ILegendRefs, ISettingsRefs} from "../types/IRefs";
+import {IAlgorithmPageRefs, IGridRefs, ILegendRefs, ISettingsRefs} from "../types/IRefs";
 import {EditMode} from "../types/EditMode";
+import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
 
 interface IAlgorithmPageProps {
-
+    onPathfindingFinished: () => void;
 }
 
-export const AlgorithmPage: React.FC<IAlgorithmPageProps> = () => {
+export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps & React.RefAttributes<IAlgorithmPageRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
     const gridRef = useRef<IGridRefs>(null);
     const settingsRef = useRef<ISettingsRefs>(null);
-    const legendRef = useRef<ILegendRefs>(null)
+    const legendRef = useRef<ILegendRefs>(null);
+
+    useImperativeHandle(refs, () => {
+        return {
+            runPathfinding
+        }
+    })
+
+    const runPathfinding = useCallback((algorithm: PathfindingAlgorithms) => {
+        gridRef.current?.runPathfinding(algorithm);
+    }, []);
 
     const handleClear = useCallback(() => {
         gridRef.current?.clearGrid();
@@ -33,12 +44,12 @@ export const AlgorithmPage: React.FC<IAlgorithmPageProps> = () => {
 
     return (
         <>
-            <SelectionBar onClear={handleClear}
+            <SelectionBar onClickClear={handleClear}
                           onShowSettings={handleOpenSettings}
                           onChangeEditMode={handleChangeEditMode} />
-            <Grid ref={gridRef} />
+            <Grid ref={gridRef} onPathfindingFinished={onPathfindingFinished} />
             <Legend ref={legendRef} />
             <Settings ref={settingsRef} onShowLegend={handleToggleLegend} />
         </>
     )
-}
+})
