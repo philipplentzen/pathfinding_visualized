@@ -47,15 +47,52 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         }
     });
 
+    const runSimulation = useCallback( (queue: Node[]) => {
+        if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode) || queue.length <= 0) {
+            return;
+        }
+
+        const currentNode = queue.shift()!;
+        const row = currentNode.getRow();
+        const column = currentNode.getColumn();
+        document.getElementById(currentNode.getId())?.classList.add("visited");
+
+        if (currentNode === targetNode.current) {
+            return;
+        }
+
+        operations.forEach(([dRow, dColumn]) => {
+            const newRow = row + dRow;
+            const newColumn = column + dColumn;
+            const newCell = document.getElementById(newRow + "-" + newColumn);
+            if (currentNode === startNode.current) {
+                queue.push(new BreadthNode(newRow, newColumn, currentNode, 1));
+            } else if (currentNode instanceof BreadthNode && newCell !== null) {
+                if (newCell.classList.contains("empty")) {
+                    queue.push(new BreadthNode(newRow, newColumn, currentNode, currentNode.length));
+                }
+                if (newCell.classList.contains("target")) {
+                    queue.push(grid[newRow][newColumn]);
+                }
+                newCell.classList.remove("empty");
+                newCell.classList.add("listed");
+            }
+        });
+
+
+        setTimeout(() => runSimulation(queue), 0);
+    }, [grid]);
+
     const clearGrid = useCallback(() => {
-        setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-            oldGrid.forEach((row, rowId) => {
-                row.forEach((node, colId) => {
-                    newGrid[rowId][colId] = new EmptyNode(rowId, colId);
-                });
-            });
-        }));
-    }, []);
+        // setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+        //     oldGrid.forEach((row, rowId) => {
+        //         row.forEach((node, colId) => {
+        //             newGrid[rowId][colId] = new EmptyNode(rowId, colId);
+        //         });
+        //     });
+        // }));
+        runSimulation([startNode.current]);
+    }, [runSimulation]);
 
     const changeEditMode = useCallback((editMode: EditMode) => {
         setEditMode(editMode);

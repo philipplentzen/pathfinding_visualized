@@ -32,10 +32,17 @@ export const GridCell = styled.div<IGridCellProps>`
     color: white;
     background-color: rgba(0, 0, 0, 0.85);
     transition: transform ease 300ms;
+  }
+  
+  &.start, &.target, &.wall, &.visited, &.listed {
     transform: scale(1);
   }
   
-  &.start, &.target  {
-    transform: scale(1);
+  &.listed {
+    background-color: seagreen;
+  }
+  
+  &.visited {
+    background-color: lightpink;
   }
 `
