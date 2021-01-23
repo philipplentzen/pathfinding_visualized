@@ -1,15 +1,15 @@
-import {Node} from "./Node";
+import {Node} from "../Node";
 
 export class BreadthNode extends Node {
-    public prevNode: Node;
-    public length: number;
-    public isVisited: boolean;
+    private prevNode: Node;
 
-    constructor(row: number, column: number, prevNode: Node, length: number) {
+    constructor(row: number, column: number, prevNode: Node) {
         super(row, column);
         this.prevNode = prevNode;
-        this.length = length;
-        this.isVisited = false;
+    }
+
+    public getPrevNode(): Node {
+        return this.prevNode;
     }
 
     public toString(): string {
