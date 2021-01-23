@@ -9,44 +9,45 @@ export const GridCell = styled.div<IGridCellProps>`
   display: table-cell;
   width: ${props => props.pixelSize}px;
   height: ${props => props.pixelSize}px;
-  
+
   font-size: 11px;
   line-height: 15px;
   text-align: center;
-  
+
   box-sizing: border-box;
   border: 1px solid #dddddd;
   cursor: pointer;
 
   transform: scale(0);
-  
+
   transition: all ease 300ms;
 
   &:hover {
     transform: scale(1);
     transition: none;
-    background-color: #40a9ff;
+    background-color: var(--hover);
   }
-  
+
   &.wall {
-    color: white;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: #262626;
     transition: transform ease 300ms;
   }
-  
+
   &.queued {
-    background-color: seagreen;
+    background-color: #006d75;
+    transition: transform ease 300ms;
   }
-  
-  &.visited {
-    background-color: lightpink;
+
+  &.visited, &.breadth {
+    background-color: #87e8de;
+    transition: background-color ease 300ms;
   }
 
   &.shortest {
-    background-color: tomato;
+    background-color: #ff4d4f;
   }
 
-  &.start, &.target, &.wall, &.queued, &.visited, &.shortest {
+  &.start, &.target, &.wall, &.queued, &.visited, &.shortest, &.breadth {
     transform: scale(1);
   }
 `

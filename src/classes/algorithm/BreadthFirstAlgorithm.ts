@@ -5,6 +5,7 @@ import {EmptyNode} from "../node/EmptyNode";
 import {BreadthNode} from "../node/breadth/BreadthNode";
 import {BreadthTargetNode} from "../node/breadth/BreadthTargetNode";
 import {ShortestNode} from "../node/ShortestNode";
+import {BreadthStartNode} from "../node/breadth/BreadthStartNode";
 
 export class BreadthFirstAlgorithm extends Algorithm {
     private operations: [number, number][];
@@ -29,13 +30,14 @@ export class BreadthFirstAlgorithm extends Algorithm {
                 document.getElementById(currentNode.getId())?.classList.add("visited");
 
                 if (currentNode instanceof BreadthTargetNode) {
-                    grid[currentNode.getRow()][currentNode.getColumn()] = new TargetNode(currentNode.getRow(), currentNode.getColumn());
                     let prevNode = currentNode.getPrevNode();
 
                     while (prevNode instanceof BreadthNode) {
                         grid[prevNode.getRow()][prevNode.getColumn()] = new ShortestNode(prevNode.getRow(), prevNode.getColumn());
                         prevNode = prevNode.getPrevNode();
                     }
+
+                    grid[prevNode.getRow()][prevNode.getColumn()] = new BreadthStartNode(prevNode.getRow(), prevNode.getColumn());
 
                     break;
                 }
