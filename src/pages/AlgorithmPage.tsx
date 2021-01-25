@@ -29,8 +29,12 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
         selectionBarRef.current?.setIsEditable(false);
     }, []);
 
-    const handleClear = useCallback(() => {
-        gridRef.current?.clearGrid();
+    const handleClearAll = useCallback(() => {
+        gridRef.current?.clearAll();
+    }, []);
+
+    const handleClearPath = useCallback(() => {
+        gridRef.current?.clearPath();
     }, []);
 
     const handleChangeEditMode = useCallback((editMode: EditMode) => {
@@ -49,13 +53,19 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
         legendRef.current?.toggleLegend();
     }, []);
 
+    const handlePathfindingFinished = useCallback(() => {
+        selectionBarRef.current?.setIsEditable(true);
+        onPathfindingFinished();
+    }, [onPathfindingFinished]);
+
     return (
         <>
             <SelectionBar ref={selectionBarRef}
-                          onClickClear={handleClear}
+                          onClickClearAll={handleClearAll}
+                          onClickClearPath={handleClearPath}
                           onShowSettings={handleOpenSettings}
                           onChangeEditMode={handleChangeEditMode} />
-            <Grid ref={gridRef} onPathfindingFinished={onPathfindingFinished} />
+            <Grid ref={gridRef} onPathfindingFinished={handlePathfindingFinished} />
             <Legend ref={legendRef} />
             <Settings ref={settingsRef} onChangeSettings={handleChangeSettings} />
         </>

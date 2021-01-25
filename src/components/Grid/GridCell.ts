@@ -10,8 +10,8 @@ export const GridCell = styled.div<IGridCellProps>`
   width: ${props => props.pixelSize}px;
   height: ${props => props.pixelSize}px;
 
-  font-size: 11px;
-  line-height: 15px;
+  font-size: ${props => props.pixelSize / 2}px;
+  line-height: ${props => props.pixelSize - 1}px;
   text-align: center;
 
   box-sizing: border-box;
@@ -31,6 +31,10 @@ export const GridCell = styled.div<IGridCellProps>`
   &.wall {
     background-color: #262626;
     transition: transform ease 300ms;
+  }
+  
+  &.start, &.target {
+    transition: none;
   }
 
   &.queued {

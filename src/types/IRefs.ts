@@ -4,7 +4,8 @@ import {ISettings} from "./ISettings";
 
 export interface IGridRefs {
     runPathfinding: (algorithm: PathfindingAlgorithms) => void;
-    clearGrid: () => void;
+    clearAll: () => void;
+    clearPath: () => void;
     changeEditMode: (editMode: EditMode) => void;
     changeSettings: (settings: ISettings) => void;
 }

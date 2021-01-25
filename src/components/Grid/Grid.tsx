@@ -26,7 +26,7 @@ interface IGridProps {
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
     const [grid, setGrid] = useState<Node[][]>([]);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
-    const [pixelSize, setPixelSize] = useState(16);
+    const [pixelSize, setPixelSize] = useState(32);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
     const startNode = useRef<Node>(new EmptyNode(0, 0));
@@ -38,7 +38,8 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     useImperativeHandle(refs, () => {
         return {
             runPathfinding,
-            clearGrid,
+            clearAll,
+            clearPath,
             changeEditMode,
             changeSettings,
         }
@@ -63,11 +64,30 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         onPathfindingFinished();
     }, [grid, onPathfindingFinished]);
 
-    const clearGrid = useCallback(() => {
+    const clearAll = useCallback(() => {
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
             oldGrid.forEach((row, rowId) => {
                 row.forEach((node, colId) => {
                     newGrid[rowId][colId] = new EmptyNode(rowId, colId);
+                });
+            });
+        }));
+    }, []);
+
+    const clearPath = useCallback(() => {
+        setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+            oldGrid.forEach((row, rowId) => {
+                row.forEach((node, colId) => {
+                    const oldCell = oldGrid[rowId][colId];
+                    if (oldCell instanceof WallNode) {
+
+                    } else if (oldCell instanceof StartNode) {
+                        newGrid[rowId][colId] = new StartNode(rowId, colId);
+                    } else if (oldCell instanceof TargetNode) {
+                        newGrid[rowId][colId] = new TargetNode(rowId, colId);
+                    } else {
+                        newGrid[rowId][colId] = new EmptyNode(rowId, colId);
+                    }
                 });
             });
         }));

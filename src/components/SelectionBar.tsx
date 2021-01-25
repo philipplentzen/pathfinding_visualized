@@ -2,6 +2,7 @@ import React, {forwardRef, useImperativeHandle, useState} from "react";
 import {Button, Divider, Space} from "antd";
 import {
     CloseOutlined,
+    RiseOutlined,
     DoubleRightOutlined,
     DragOutlined,
     LoginOutlined,
@@ -14,7 +15,8 @@ import {EditModeHandler} from "../classes/EditModeHandler";
 import {ISelectionBarRefs} from "../types/IRefs";
 
 interface ISelectionBarProps {
-    onClickClear: () => void;
+    onClickClearAll: () => void;
+    onClickClearPath: () => void;
     onShowSettings: () => void;
     onChangeEditMode: (editMode: EditMode) => void;
 }
@@ -29,7 +31,7 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClear, onShowSettings, onChangeEditMode}, refs) => {
+export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClearAll, onClickClearPath, onShowSettings, onChangeEditMode}, refs) => {
     const [isEditable, setIsEditable] = useState(true);
     const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
 
@@ -37,7 +39,7 @@ export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & 
         return {
             setIsEditable: (isEditable => {
                 handleEditModeChange(EditMode.DRAG);
-                setIsEditable(false);
+                setIsEditable(isEditable);
             }),
         }
     });
@@ -80,10 +82,17 @@ export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & 
             </Space>
             <Space split={<Divider type="vertical" />}>
                 <Button type="text"
+                        size="small"
+                        disabled={!isEditable}
+                        onClick={onClickClearPath}
+                        icon={<RiseOutlined />}>
+                    Clear Path
+                </Button>
+                <Button type="text"
                         danger
                         size="small"
                         disabled={!isEditable}
-                        onClick={onClickClear}
+                        onClick={onClickClearAll}
                         icon={<CloseOutlined />}>
                     Clear All
                 </Button>
