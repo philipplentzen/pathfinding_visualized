@@ -1,13 +1,15 @@
-import React, {forwardRef, useCallback, useImperativeHandle, useState} from "react";
-import {Button, Col, Modal, Row, Slider} from "antd";
+import React, {forwardRef, useCallback, useImperativeHandle, useRef, useState} from "react";
+import {Col, Modal, Row, Slider} from "antd";
 import {ISettingsRefs} from "../types/IRefs";
+import {ISettings} from "../types/ISettings";
 
 interface ISettingsProps {
-    onShowLegend: () => void;
+    onChangeSettings: (settings: ISettings) => void;
 }
 
-export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.RefAttributes<ISettingsRefs>> = forwardRef(({onShowLegend}, refs) => {
+export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.RefAttributes<ISettingsRefs>> = forwardRef(({onChangeSettings}, refs) => {
     const [isShown, setIsShown] = useState(false);
+    const settings = useRef<ISettings>({});
 
     useImperativeHandle(refs, () => {
         return {
@@ -19,11 +21,17 @@ export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.Re
         setIsShown(true);
     }, []);
 
+    const handleOkClick = useCallback(() => {
+        setIsShown(false);
+        onChangeSettings({pixelSize: 32});
+        settings.current = {};
+    }, [onChangeSettings]);
+
     return (
         <Modal title="Settings"
                visible={isShown}
-               onCancel={() => setIsShown(false)}
-               footer={<Button type="primary" onClick={() => setIsShown(false)}>Done!</Button>}>
+               onOk={handleOkClick}
+               onCancel={() => setIsShown(false)}>
             <Row gutter={8}>
                 <Col span={6}>Zoom</Col>
                 <Col span={18}>
@@ -33,7 +41,6 @@ export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.Re
                             step={1} />
                 </Col>
             </Row>
-            <Button onClick={onShowLegend}>Show Legend</Button>
         </Modal>
     )
 })

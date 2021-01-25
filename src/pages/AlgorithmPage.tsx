@@ -3,15 +3,17 @@ import {Grid} from "../components/Grid/Grid";
 import {SelectionBar} from "../components/SelectionBar";
 import {Legend} from "../components/Legend";
 import {Settings} from "../components/Settings";
-import {IAlgorithmPageRefs, IGridRefs, ILegendRefs, ISettingsRefs} from "../types/IRefs";
+import {IAlgorithmPageRefs, IGridRefs, ILegendRefs, ISelectionBarRefs, ISettingsRefs} from "../types/IRefs";
 import {EditMode} from "../types/EditMode";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
+import {ISettings} from "../types/ISettings";
 
 interface IAlgorithmPageProps {
     onPathfindingFinished: () => void;
 }
 
 export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps & React.RefAttributes<IAlgorithmPageRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
+    const selectionBarRef = useRef<ISelectionBarRefs>(null);
     const gridRef = useRef<IGridRefs>(null);
     const settingsRef = useRef<ISettingsRefs>(null);
     const legendRef = useRef<ILegendRefs>(null);
@@ -24,6 +26,7 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
 
     const runPathfinding = useCallback((algorithm: PathfindingAlgorithms) => {
         gridRef.current?.runPathfinding(algorithm);
+        selectionBarRef.current?.setIsEditable(false);
     }, []);
 
     const handleClear = useCallback(() => {
@@ -32,6 +35,10 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
 
     const handleChangeEditMode = useCallback((editMode: EditMode) => {
         gridRef.current?.changeEditMode(editMode);
+    }, []);
+
+    const handleChangeSettings = useCallback((settings: ISettings) => {
+        gridRef.current?.changeSettings(settings);
     }, []);
 
     const handleOpenSettings = useCallback(() => {
@@ -44,12 +51,13 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
 
     return (
         <>
-            <SelectionBar onClickClear={handleClear}
+            <SelectionBar ref={selectionBarRef}
+                          onClickClear={handleClear}
                           onShowSettings={handleOpenSettings}
                           onChangeEditMode={handleChangeEditMode} />
             <Grid ref={gridRef} onPathfindingFinished={onPathfindingFinished} />
             <Legend ref={legendRef} />
-            <Settings ref={settingsRef} onShowLegend={handleToggleLegend} />
+            <Settings ref={settingsRef} onChangeSettings={handleChangeSettings} />
         </>
     )
 })

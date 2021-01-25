@@ -1,9 +1,17 @@
-import React, {useState} from "react";
+import React, {forwardRef, useImperativeHandle, useState} from "react";
 import {Button, Divider, Space} from "antd";
-import {CloseOutlined, DoubleRightOutlined, DragOutlined, LoginOutlined, PlusSquareOutlined, SettingOutlined} from "@ant-design/icons";
+import {
+    CloseOutlined,
+    DoubleRightOutlined,
+    DragOutlined,
+    LoginOutlined,
+    PlusSquareOutlined,
+    SettingOutlined
+} from "@ant-design/icons";
 import styled from "styled-components";
 import {EditMode} from "../types/EditMode";
 import {EditModeHandler} from "../classes/EditModeHandler";
+import {ISelectionBarRefs} from "../types/IRefs";
 
 interface ISelectionBarProps {
     onClickClear: () => void;
@@ -21,8 +29,18 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.FC<ISelectionBarProps> = ({onClickClear, onShowSettings, onChangeEditMode}) => {
+export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClear, onShowSettings, onChangeEditMode}, refs) => {
+    const [isEditable, setIsEditable] = useState(true);
     const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
+
+    useImperativeHandle(refs, () => {
+        return {
+            setIsEditable: (isEditable => {
+                handleEditModeChange(EditMode.DRAG);
+                setIsEditable(false);
+            }),
+        }
+    });
 
     const handleEditModeChange = (editMode: EditMode) => {
         onChangeEditMode(editMode);
@@ -40,18 +58,21 @@ export const SelectionBar: React.FC<ISelectionBarProps> = ({onClickClear, onShow
                 </Button>
                 <Button type={editMode === EditMode.START ? "link" : "text"}
                         size="small"
+                        disabled={!isEditable}
                         onClick={() => handleEditModeChange(EditMode.START)}
                         icon={<DoubleRightOutlined />}>
                     Start
                 </Button>
                 <Button type={editMode === EditMode.TARGET ? "link" : "text"}
                         size="small"
+                        disabled={!isEditable}
                         onClick={() => handleEditModeChange(EditMode.TARGET)}
                         icon={<LoginOutlined />}>
                     Target
                 </Button>
                 <Button type={editMode === EditMode.WALLS ? "link" : "text"}
                         size="small"
+                        disabled={!isEditable}
                         onClick={() => handleEditModeChange(EditMode.WALLS)}
                         icon={<PlusSquareOutlined />}>
                     Walls
@@ -61,15 +82,17 @@ export const SelectionBar: React.FC<ISelectionBarProps> = ({onClickClear, onShow
                 <Button type="text"
                         danger
                         size="small"
+                        disabled={!isEditable}
                         onClick={onClickClear}
                         icon={<CloseOutlined />}>
                     Clear All
                 </Button>
                 <Button type="text"
                         size="small"
+                        disabled={!isEditable}
                         onClick={onShowSettings}
                         icon={<SettingOutlined />} />
             </Space>
         </Container>
     )
-}
+})

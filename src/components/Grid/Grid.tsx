@@ -17,6 +17,7 @@ import {BreadthFirstAlgorithm} from "../../classes/algorithm/BreadthFirstAlgorit
 import * as _ from "lodash";
 import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
 import {notification} from "antd";
+import {ISettings} from "../../types/ISettings";
 
 interface IGridProps {
     onPathfindingFinished: () => void;
@@ -25,6 +26,7 @@ interface IGridProps {
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
     const [grid, setGrid] = useState<Node[][]>([]);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
+    const [pixelSize, setPixelSize] = useState(16);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
     const startNode = useRef<Node>(new EmptyNode(0, 0));
@@ -33,13 +35,12 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         return [];
     }, undefined);
 
-    const pixelSize = 16;
-
     useImperativeHandle(refs, () => {
         return {
             runPathfinding,
             clearGrid,
             changeEditMode,
+            changeSettings,
         }
     });
 
@@ -48,13 +49,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             return;
         }
         let newGrid: Node[][] = [];
-        console.log(algorithm);
         switch (algorithm) {
             case PathfindingAlgorithms.BREADTH:
                 newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
         }
         if (newGrid !== []) {
-            console.log(newGrid);
             setGrid(newGrid);
         } else {
             notification.error({
@@ -78,6 +77,12 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         setEditMode(editMode);
     }, []);
 
+    const changeSettings = useCallback((settings: ISettings) => {
+        if (settings.pixelSize !== undefined) {
+            setPixelSize(settings.pixelSize);
+        }
+    }, []);
+
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
             const rows: number = Math.floor(element.clientHeight / pixelSize);
@@ -85,7 +90,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }
-    }, []);
+    }, [pixelSize]);
 
     const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();
@@ -152,7 +157,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     return (
         <GridContainer ref={buildGrid}>
             <TransformWrapper wheel={{step: 200}}
-                              options={{disabled: editMode !== EditMode.DRAG}}>
+                              pan={{disabled: editMode !== EditMode.DRAG}}>
                 <TransformComponent>
                     <GridTable>
                         {grid.map((nodes, rowId) => (
