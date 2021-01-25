@@ -1,7 +1,7 @@
 import React, {forwardRef, useCallback, useImperativeHandle, useState} from "react";
 import styled from "styled-components";
 import {Card, Space, Typography} from "antd";
-import {DoubleRightOutlined, LoginOutlined, PlusSquareOutlined} from "@ant-design/icons";
+import {DoubleRightOutlined, LoginOutlined} from "@ant-design/icons";
 import {ILegendRefs} from "../types/IRefs";
 
 interface ILegendProps {
@@ -24,7 +24,15 @@ const Wall = styled.div`
   width: 14px;
   height: 14px;
   display: inline-block;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: #262626;
+  transform: translateY(3px);
+`
+
+const Shortest = styled.div`
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  background-color: #ff4d4f;
   transform: translateY(3px);
 `
 
@@ -48,7 +56,7 @@ export const Legend: React.ForwardRefExoticComponent<ILegendProps & React.RefAtt
                     <Typography.Text><DoubleRightOutlined /> : Start Node</Typography.Text>
                     <Typography.Text><LoginOutlined /> : Target Node</Typography.Text>
                     <Typography.Text><Wall /> : Wall Node</Typography.Text>
-                    <Typography.Text><PlusSquareOutlined /> : Shortest Path</Typography.Text>
+                    <Typography.Text><Shortest /> : Shortest Path</Typography.Text>
                 </Space>
             </Card>
         </Container>
