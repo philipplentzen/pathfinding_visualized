@@ -37,7 +37,7 @@ const Shortest = styled.div`
 `
 
 export const Legend: React.ForwardRefExoticComponent<ILegendProps & React.RefAttributes<ILegendRefs>> = forwardRef((props, refs) => {
-    const [isShown, setIsShown] = useState(true);
+    const [isShown, setIsShown] = useState(false);
 
     useImperativeHandle(refs, () => {
        return {
