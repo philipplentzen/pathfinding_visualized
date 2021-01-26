@@ -18,12 +18,12 @@ export const Layout: React.ForwardRefExoticComponent<ILayoutProps & React.RefAtt
 
     useImperativeHandle(refs, () => {
         return {
-            pathfindingFinished,
+            setIsPageBusy,
         }
     });
 
-    const pathfindingFinished = useCallback(() => {
-        headerRef.current?.pathfindingFinished();
+    const setIsPageBusy = useCallback((isBusy: boolean) => {
+        headerRef.current?.setIsPageBusy(isBusy);
     }, []);
 
     return (

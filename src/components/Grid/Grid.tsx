@@ -21,10 +21,11 @@ import {ISettings} from "../../types/ISettings";
 import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/RecursiveDivisionAlgorithm";
 
 interface IGridProps {
-    onPathfindingFinished: () => void;
+    pathfindingFinished: () => void;
+    mazeCreationFinished: () => void;
 }
 
-export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
+export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({pathfindingFinished, mazeCreationFinished}, refs) => {
     const [grid, setGrid] = useState<Node[][]>([]);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
     const [pixelSize, setPixelSize] = useState(32);
@@ -92,12 +93,13 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 message: "Pathfinding Failed!"
             });
         }
-        onPathfindingFinished();
-    }, [grid, onPathfindingFinished]);
+        pathfindingFinished();
+    }, [grid, pathfindingFinished]);
 
     const createMaze = useCallback(async () => {
         const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
         setGrid(newGrid);
+        mazeCreationFinished();
     }, [grid]);
 
     const changeEditMode = useCallback((editMode: EditMode) => {

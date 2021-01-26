@@ -24,11 +24,11 @@ export interface IAlgorithmPageRefs {
 }
 
 export interface ILayoutRefs {
-    pathfindingFinished: () => void;
+    setIsPageBusy: (isBusy: boolean) => void;
 }
 
 export interface IHeaderRefs {
-    pathfindingFinished: () => void;
+    setIsPageBusy: (isBusy: boolean) => void;
 }
 
 export interface ISelectionBarRefs {

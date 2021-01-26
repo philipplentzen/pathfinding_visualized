@@ -17,14 +17,14 @@ export const Router: React.FC<IRouterProps> = () => {
         algorithmPageRef.current?.runPathfinding(algorithm);
     }, []);
 
-    const handlePathfindingFinished = useCallback(() => {
-        layoutRef.current?.pathfindingFinished();
+    const handleIsPageBusy = useCallback((isBusy: boolean) => {
+        layoutRef.current?.setIsPageBusy(isBusy);
     }, []);
 
     return (
         <BrowserRouter>
             <Layout ref={layoutRef} handleRunPathfinding={handleRunPathfinding}>
-                <AlgorithmPage ref={algorithmPageRef} onPathfindingFinished={handlePathfindingFinished} />
+                <AlgorithmPage ref={algorithmPageRef} isPageBusy={handleIsPageBusy} />
             </Layout>
         </BrowserRouter>
     );

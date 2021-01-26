@@ -9,10 +9,10 @@ import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
 import {ISettings} from "../types/ISettings";
 
 interface IAlgorithmPageProps {
-    onPathfindingFinished: () => void;
+    isPageBusy: (isBusy: boolean) => void;
 }
 
-export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps & React.RefAttributes<IAlgorithmPageRefs>> = forwardRef(({onPathfindingFinished}, refs) => {
+export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps & React.RefAttributes<IAlgorithmPageRefs>> = forwardRef(({isPageBusy}, refs) => {
     const selectionBarRef = useRef<ISelectionBarRefs>(null);
     const gridRef = useRef<IGridRefs>(null);
     const settingsRef = useRef<ISettingsRefs>(null);
@@ -26,8 +26,14 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
 
     const runPathfinding = useCallback((algorithm: PathfindingAlgorithms) => {
         gridRef.current?.runPathfinding(algorithm);
+        isPageBusy(true);
         selectionBarRef.current?.setIsEditable(false);
-    }, []);
+    }, [isPageBusy]);
+
+    const handlePathfindingFinished = useCallback(() => {
+        isPageBusy(false);
+        selectionBarRef.current?.setIsEditable(true);
+    }, [isPageBusy]);
 
     const handleClearAll = useCallback(() => {
         gridRef.current?.clearAll();
@@ -53,14 +59,16 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
         legendRef.current?.toggleLegend();
     }, []);
 
-    const handlePathfindingFinished = useCallback(() => {
-        selectionBarRef.current?.setIsEditable(true);
-        onPathfindingFinished();
-    }, [onPathfindingFinished]);
-
     const handleCreateMaze = useCallback(() => {
         gridRef.current?.createMaze();
-    }, []);
+        isPageBusy(true);
+        selectionBarRef.current?.setIsEditable(false);
+    }, [isPageBusy]);
+
+    const handleMazeCreationFinished = useCallback(() => {
+        isPageBusy(false);
+        selectionBarRef.current?.setIsEditable(true);
+    }, [isPageBusy]);
 
     return (
         <>
@@ -70,7 +78,7 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
                           onShowSettings={handleOpenSettings}
                           onChangeEditMode={handleChangeEditMode}
                           onClickCreateMaze={handleCreateMaze} />
-            <Grid ref={gridRef} onPathfindingFinished={handlePathfindingFinished} />
+            <Grid ref={gridRef} pathfindingFinished={handlePathfindingFinished} mazeCreationFinished={handleMazeCreationFinished} />
             <Legend ref={legendRef} />
             <Settings ref={settingsRef} onChangeSettings={handleChangeSettings} />
         </>

@@ -26,24 +26,23 @@ const HeaderContainer = styled.header`
 
 export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAttributes<IHeaderRefs>> = forwardRef(({onClickRunPathfinding}, refs) => {
     const [algorithm, setAlgorithm] = useState<PathfindingAlgorithms | undefined>(undefined);
-    const [isRunning, setIsRunning] = useState(false);
+    const [isBusy, setIsBusy] = useState(false);
 
     useImperativeHandle(refs, () => {
         return {
-            pathfindingFinished
+            setIsPageBusy
         }
     });
 
-    const pathfindingFinished = useCallback(() => {
-        setIsRunning(false);
+    const setIsPageBusy = useCallback((isBusy: boolean) => {
+        setIsBusy(isBusy);
     }, []);
 
     const handleRunPathfinding = useCallback(() => {
-        if (algorithm !== undefined && !isRunning) {
-            setIsRunning(true);
+        if (algorithm !== undefined && !isBusy) {
             onClickRunPathfinding(algorithm);
         }
-    }, [algorithm, isRunning, onClickRunPathfinding]);
+    }, [algorithm, isBusy, onClickRunPathfinding]);
 
     return (
         <HeaderContainer>
@@ -51,7 +50,7 @@ export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAtt
             <Space split={<Divider type="vertical" />}>
                 <Select placeholder="Select algorithm"
                         value={algorithm}
-                        disabled={isRunning}
+                        disabled={isBusy}
                         size="large"
                         onSelect={(value) => setAlgorithm(value)}
                         style={{width: 200}}>
@@ -61,7 +60,7 @@ export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAtt
                 </Select>
                 <Button type="primary"
                         size="large"
-                        loading={isRunning}
+                        loading={isBusy}
                         disabled={algorithm === undefined}
                         onClick={() => handleRunPathfinding()}
                         style={{width: 100}}>Run!</Button>
