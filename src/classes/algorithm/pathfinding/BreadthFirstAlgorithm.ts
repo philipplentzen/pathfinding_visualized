@@ -1,11 +1,12 @@
-import {Algorithm} from "./Algorithm";
-import {Node} from "../node/Node";
-import {TargetNode} from "../node/TargetNode";
-import {EmptyNode} from "../node/EmptyNode";
-import {BreadthNode} from "../node/breadth/BreadthNode";
-import {BreadthTargetNode} from "../node/breadth/BreadthTargetNode";
-import {ShortestNode} from "../node/ShortestNode";
-import {BreadthStartNode} from "../node/breadth/BreadthStartNode";
+import {Algorithm} from "../Algorithm";
+import {Node} from "../../node/Node";
+import {TargetNode} from "../../node/TargetNode";
+import {EmptyNode} from "../../node/EmptyNode";
+import {BreadthNode} from "../../node/breadth/BreadthNode";
+import {BreadthTargetNode} from "../../node/breadth/BreadthTargetNode";
+import {ShortestNode} from "../../node/ShortestNode";
+import {BreadthStartNode} from "../../node/breadth/BreadthStartNode";
+import {BreadthQueuedNode} from "../../node/breadth/BreadthQueuedNode";
 
 export class BreadthFirstAlgorithm extends Algorithm {
     private operations: [number, number][];
@@ -23,21 +24,22 @@ export class BreadthFirstAlgorithm extends Algorithm {
 
     public async run(startNode: Node, grid: Node[][], speed: number): Promise<Node[][]> {
         const queue = [startNode];
+        const toUpdate: Node[] = [];
 
         while (queue.length > 0) {
             const currentNode = queue.shift();
             if (currentNode !== undefined) {
-                document.getElementById(currentNode.getId())?.classList.add("visited");
-
-                if (currentNode instanceof BreadthTargetNode) {
+                if (currentNode instanceof BreadthQueuedNode) {
+                    toUpdate.push(new BreadthNode(currentNode.getRow(), currentNode.getColumn(), currentNode.getPrevNode()));
+                } else if (currentNode instanceof BreadthTargetNode) {
                     let prevNode = currentNode.getPrevNode();
 
                     while (prevNode instanceof BreadthNode) {
-                        grid[prevNode.getRow()][prevNode.getColumn()] = new ShortestNode(prevNode.getRow(), prevNode.getColumn());
+                        toUpdate.push(new ShortestNode(prevNode.getRow(), prevNode.getColumn()));
                         prevNode = prevNode.getPrevNode();
                     }
 
-                    grid[prevNode.getRow()][prevNode.getColumn()] = new BreadthStartNode(prevNode.getRow(), prevNode.getColumn());
+                    toUpdate.push(new BreadthStartNode(prevNode.getRow(), prevNode.getColumn()));
 
                     break;
                 }
@@ -52,21 +54,19 @@ export class BreadthFirstAlgorithm extends Algorithm {
                         if (newNode instanceof TargetNode) {
                             newNode = new BreadthTargetNode(newRow, newColumn, currentNode);
                         } else if (newNode instanceof EmptyNode) {
-                            newNode = new BreadthNode(newRow, newColumn, currentNode);
+                            newNode = new BreadthQueuedNode(newRow, newColumn, currentNode);
                         }
 
                         if (newNode !== grid[newRow][newColumn]) {
                             grid[newRow][newColumn] = newNode;
-                            document.getElementById(newRow + "-" + newColumn)?.classList.add("queued");
+                            toUpdate.push(newNode);
                             queue.push(newNode);
                         }
                     }
                 });
-
-                await new Promise(res => setTimeout(res, speed));
             }
         }
 
-        return grid;
+        return await BreadthFirstAlgorithm.draw(toUpdate, grid);
     }
 }

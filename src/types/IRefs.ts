@@ -8,6 +8,7 @@ export interface IGridRefs {
     clearPath: () => void;
     changeEditMode: (editMode: EditMode) => void;
     changeSettings: (settings: ISettings) => void;
+    createMaze: () => void;
 }
 
 export interface ISettingsRefs {

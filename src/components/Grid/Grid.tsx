@@ -13,11 +13,12 @@ import {GridRow} from "./GridRow";
 import {GridCell} from "./GridCell";
 import {GridContainer} from "./GridContainer";
 import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
-import {BreadthFirstAlgorithm} from "../../classes/algorithm/BreadthFirstAlgorithm";
+import {BreadthFirstAlgorithm} from "../../classes/algorithm/pathfinding/BreadthFirstAlgorithm";
 import * as _ from "lodash";
 import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
 import {notification} from "antd";
 import {ISettings} from "../../types/ISettings";
+import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/RecursiveDivisionAlgorithm";
 
 interface IGridProps {
     onPathfindingFinished: () => void;
@@ -42,27 +43,9 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             clearPath,
             changeEditMode,
             changeSettings,
+            createMaze,
         }
     });
-
-    const runPathfinding = useCallback( async (algorithm: PathfindingAlgorithms) => {
-        if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode)) {
-            return;
-        }
-        let newGrid: Node[][] = [];
-        switch (algorithm) {
-            case PathfindingAlgorithms.BREADTH:
-                newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
-        }
-        if (newGrid !== []) {
-            setGrid(newGrid);
-        } else {
-            notification.error({
-                message: "Pathfinding Failed!"
-            });
-        }
-        onPathfindingFinished();
-    }, [grid, onPathfindingFinished]);
 
     const clearAll = useCallback(() => {
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
@@ -93,6 +76,30 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         }));
     }, []);
 
+    const runPathfinding = useCallback( async (algorithm: PathfindingAlgorithms) => {
+        if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode)) {
+            return;
+        }
+        let newGrid: Node[][] = [];
+        switch (algorithm) {
+            case PathfindingAlgorithms.BREADTH:
+                newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
+        }
+        if (newGrid !== []) {
+            setGrid(newGrid);
+        } else {
+            notification.error({
+                message: "Pathfinding Failed!"
+            });
+        }
+        onPathfindingFinished();
+    }, [grid, onPathfindingFinished]);
+
+    const createMaze = useCallback(async () => {
+        const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
+        setGrid(newGrid);
+    }, [grid]);
+
     const changeEditMode = useCallback((editMode: EditMode) => {
         setEditMode(editMode);
     }, []);
@@ -105,8 +112,17 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
-            const rows: number = Math.floor(element.clientHeight / pixelSize);
-            const cols: number = Math.floor(element.clientWidth / pixelSize);
+            let rows: number = Math.floor(element.clientHeight / pixelSize);
+            let cols: number = Math.floor(element.clientWidth / pixelSize);
+
+            if (rows % 2 === 0) {
+                rows -= 1;
+            }
+            if (cols % 2 === 0) {
+                cols -= 1;
+            }
+
+            setPixelSize(element.clientWidth / cols);
 
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }

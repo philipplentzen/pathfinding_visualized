@@ -58,13 +58,18 @@ export const AlgorithmPage: React.ForwardRefExoticComponent<IAlgorithmPageProps 
         onPathfindingFinished();
     }, [onPathfindingFinished]);
 
+    const handleCreateMaze = useCallback(() => {
+        gridRef.current?.createMaze();
+    }, []);
+
     return (
         <>
             <SelectionBar ref={selectionBarRef}
                           onClickClearAll={handleClearAll}
                           onClickClearPath={handleClearPath}
                           onShowSettings={handleOpenSettings}
-                          onChangeEditMode={handleChangeEditMode} />
+                          onChangeEditMode={handleChangeEditMode}
+                          onClickCreateMaze={handleCreateMaze} />
             <Grid ref={gridRef} onPathfindingFinished={handlePathfindingFinished} />
             <Legend ref={legendRef} />
             <Settings ref={settingsRef} onChangeSettings={handleChangeSettings} />

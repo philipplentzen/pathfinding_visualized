@@ -1,17 +1,17 @@
 import React, {forwardRef, useImperativeHandle, useState} from "react";
 import {Button, Divider, Space} from "antd";
 import {
+    BuildOutlined,
     CloseOutlined,
-    RiseOutlined,
     DoubleRightOutlined,
     DragOutlined,
     LoginOutlined,
     PlusSquareOutlined,
+    RiseOutlined,
     SettingOutlined
 } from "@ant-design/icons";
 import styled from "styled-components";
 import {EditMode} from "../types/EditMode";
-import {EditModeHandler} from "../classes/EditModeHandler";
 import {ISelectionBarRefs} from "../types/IRefs";
 
 interface ISelectionBarProps {
@@ -19,6 +19,7 @@ interface ISelectionBarProps {
     onClickClearPath: () => void;
     onShowSettings: () => void;
     onChangeEditMode: (editMode: EditMode) => void;
+    onClickCreateMaze: () => void;
 }
 
 const Container = styled.div`
@@ -31,9 +32,9 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClearAll, onClickClearPath, onShowSettings, onChangeEditMode}, refs) => {
+export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClearAll, onClickClearPath, onShowSettings, onChangeEditMode, onClickCreateMaze}, refs) => {
     const [isEditable, setIsEditable] = useState(true);
-    const [editMode, setEditMode] = useState<EditMode>(EditModeHandler.editMode);
+    const [editMode, setEditMode] = useState<EditMode>(EditMode.DRAG);
 
     useImperativeHandle(refs, () => {
         return {
@@ -52,33 +53,44 @@ export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & 
     return (
         <Container>
             <Space split={<Divider type="vertical" />}>
-                <Button type={editMode === EditMode.DRAG ? "link" : "text"}
-                        size="small"
-                        onClick={() => handleEditModeChange(EditMode.DRAG)}
-                        icon={<DragOutlined />}>
-                    Drag
-                </Button>
-                <Button type={editMode === EditMode.START ? "link" : "text"}
-                        size="small"
-                        disabled={!isEditable}
-                        onClick={() => handleEditModeChange(EditMode.START)}
-                        icon={<DoubleRightOutlined />}>
-                    Start
-                </Button>
-                <Button type={editMode === EditMode.TARGET ? "link" : "text"}
-                        size="small"
-                        disabled={!isEditable}
-                        onClick={() => handleEditModeChange(EditMode.TARGET)}
-                        icon={<LoginOutlined />}>
-                    Target
-                </Button>
-                <Button type={editMode === EditMode.WALLS ? "link" : "text"}
-                        size="small"
-                        disabled={!isEditable}
-                        onClick={() => handleEditModeChange(EditMode.WALLS)}
-                        icon={<PlusSquareOutlined />}>
-                    Walls
-                </Button>
+                <Space>
+                    <Button type={editMode === EditMode.DRAG ? "link" : "text"}
+                            size="small"
+                            onClick={() => handleEditModeChange(EditMode.DRAG)}
+                            icon={<DragOutlined />}>
+                        Drag
+                    </Button>
+                    <Button type={editMode === EditMode.START ? "link" : "text"}
+                            size="small"
+                            disabled={!isEditable}
+                            onClick={() => handleEditModeChange(EditMode.START)}
+                            icon={<DoubleRightOutlined />}>
+                        Start
+                    </Button>
+                    <Button type={editMode === EditMode.TARGET ? "link" : "text"}
+                            size="small"
+                            disabled={!isEditable}
+                            onClick={() => handleEditModeChange(EditMode.TARGET)}
+                            icon={<LoginOutlined />}>
+                        Target
+                    </Button>
+                    <Button type={editMode === EditMode.WALLS ? "link" : "text"}
+                            size="small"
+                            disabled={!isEditable}
+                            onClick={() => handleEditModeChange(EditMode.WALLS)}
+                            icon={<PlusSquareOutlined />}>
+                        Walls
+                    </Button>
+                </Space>
+                <Space>
+                    <Button type="text"
+                            size="small"
+                            disabled={!isEditable}
+                            onClick={onClickCreateMaze}
+                            icon={<BuildOutlined />}>
+                        Random Maze
+                    </Button>
+                </Space>
             </Space>
             <Space split={<Divider type="vertical" />}>
                 <Button type="text"
