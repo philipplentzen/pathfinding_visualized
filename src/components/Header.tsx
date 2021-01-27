@@ -1,5 +1,6 @@
 import React, {forwardRef, useCallback, useImperativeHandle, useState} from "react";
-import {Button, Divider, Select, Space, Typography} from "antd";
+import {Button, Divider, Popover, Select, Space, Typography} from "antd";
+import {InfoCircleOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
 import {IHeaderRefs} from "../types/IRefs";
@@ -48,16 +49,23 @@ export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAtt
         <HeaderContainer>
             <Typography.Title level={3} style={{marginBottom: 0}}>Pathfinding Visualized</Typography.Title>
             <Space split={<Divider type="vertical" />}>
-                <Select placeholder="Select algorithm"
-                        value={algorithm}
-                        disabled={isBusy}
-                        size="large"
-                        onSelect={(value) => setAlgorithm(value)}
-                        style={{width: 200}}>
-                    {Object.entries(PathfindingAlgorithms).map(([key, algorithm]) => (
-                        <Select.Option value={algorithm} key={key}>{algorithm}</Select.Option>
-                    ))}
-                </Select>
+                <div>
+                    <Button type="text"
+                            size="large"
+                            disabled={algorithm === undefined}
+                            icon={<InfoCircleOutlined />}
+                            style={{display: algorithm === undefined ? "none" : ""}}/>
+                    <Select placeholder="Select algorithm"
+                            value={algorithm}
+                            disabled={isBusy}
+                            size="large"
+                            onSelect={(value) => setAlgorithm(value)}
+                            style={{width: 200}}>
+                        {Object.entries(PathfindingAlgorithms).map(([key, algorithm]) => (
+                            <Select.Option value={algorithm} key={key}>{algorithm}</Select.Option>
+                        ))}
+                    </Select>
+                </div>
                 <Button type="primary"
                         size="large"
                         loading={isBusy}
