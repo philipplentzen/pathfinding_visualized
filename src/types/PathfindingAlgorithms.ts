@@ -1,6 +1,6 @@
 export enum PathfindingAlgorithms {
-    BREADTH = "Breadth First",
-    DEPTH = "Depth First",
+    BREADTH = "Breadth First Search",
+    DEPTH = "Depth First Search",
     DIJKSTRA = "Dijkstra",
     ASTAR = "A*",
 }
