@@ -79,37 +79,53 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
     const runPathfinding = useCallback( async (algorithm: PathfindingAlgorithms) => {
         if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode)) {
+            notification.error({
+                message: "Pathfinding could not be started!",
+                description: "Whether start or target node is not set.",
+            });
+            await new Promise(resolve => setTimeout(resolve, 100));
+            pathfindingFinished();
             return;
         }
-        let newGrid: Node[][] = [];
-        switch (algorithm) {
-            case PathfindingAlgorithms.BREADTH:
-                newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
-        }
-        if (newGrid !== []) {
-            setGrid(newGrid);
-        } else {
-            notification.error({
-                message: "Pathfinding Failed!"
-            });
+        try {
+            let newGrid: Node[][] = [];
+            switch (algorithm) {
+                case PathfindingAlgorithms.BREADTH:
+                    newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
+            }
+            if (newGrid !== []) {
+                setGrid(newGrid);
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                notification.error({
+                    message: "Pathfinding failed!",
+                    description: error.message,
+                });
+            }
         }
         pathfindingFinished();
     }, [grid, pathfindingFinished]);
 
     const createMaze = useCallback(async () => {
+        await clearAll();
         const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
         setGrid(newGrid);
         mazeCreationFinished();
-    }, [grid]);
+    }, [grid, mazeCreationFinished, clearAll]);
 
     const changeEditMode = useCallback((editMode: EditMode) => {
         setEditMode(editMode);
     }, []);
 
-    const changeSettings = useCallback((settings: ISettings) => {
+    const changeSettings = useCallback(async (settings: ISettings) => {
+        setIsWorking(true);
+        await new Promise(resolve => setTimeout(resolve, 10));
         if (settings.pixelSize !== undefined) {
-            setPixelSize(settings.pixelSize);
+            await setPixelSize(settings.pixelSize);
         }
+        await new Promise(resolve => setTimeout(resolve, 10));
+        setIsWorking(false);
     }, []);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {

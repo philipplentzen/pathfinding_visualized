@@ -25,6 +25,7 @@ export class BreadthFirstAlgorithm extends Algorithm {
     public async run(startNode: Node, grid: Node[][], speed: number): Promise<Node[][]> {
         const queue = [startNode];
         const toUpdate: Node[] = [];
+        let successful = false;
 
         while (queue.length > 0) {
             const currentNode = queue.shift();
@@ -32,6 +33,7 @@ export class BreadthFirstAlgorithm extends Algorithm {
                 if (currentNode instanceof BreadthQueuedNode) {
                     toUpdate.push(new BreadthNode(currentNode.getRow(), currentNode.getColumn(), currentNode.getPrevNode()));
                 } else if (currentNode instanceof BreadthTargetNode) {
+                    successful = true;
                     let prevNode = currentNode.getPrevNode();
 
                     while (prevNode instanceof BreadthNode) {
@@ -67,6 +69,12 @@ export class BreadthFirstAlgorithm extends Algorithm {
             }
         }
 
-        return await BreadthFirstAlgorithm.draw(toUpdate, grid);
+        const newGrid = await BreadthFirstAlgorithm.draw(toUpdate, grid);
+
+        if (!successful) {
+            throw new Error("Breadth First Algorithm could not find a valid path.");
+        }
+
+        return newGrid;
     }
 }
