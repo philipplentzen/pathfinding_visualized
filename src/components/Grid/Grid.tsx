@@ -48,7 +48,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         }
     });
 
-    const clearAll = useCallback(() => {
+    const clearAll = useCallback(async () => {
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
             oldGrid.forEach((row, rowId) => {
                 row.forEach((node, colId) => {
@@ -56,9 +56,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 });
             });
         }));
+
+        await new Promise(resolve => setTimeout(resolve, 0));
     }, []);
 
-    const clearPath = useCallback(() => {
+    const clearPath = useCallback(async () => {
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
             oldGrid.forEach((row, rowId) => {
                 row.forEach((node, colId) => {
@@ -75,6 +77,8 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 });
             });
         }));
+
+        await new Promise(resolve => setTimeout(resolve, 0));
     }, []);
 
     const runPathfinding = useCallback( async (algorithm: PathfindingAlgorithms) => {

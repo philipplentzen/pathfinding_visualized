@@ -23,9 +23,14 @@ export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.Re
 
     const handleOkClick = useCallback(() => {
         setIsShown(false);
-        onChangeSettings({pixelSize: 32});
+        onChangeSettings(settings.current);
         settings.current = {};
     }, [onChangeSettings]);
+
+    const handleGridSizeSliderChange = useCallback((value: number) => {
+        if (value < 1 || value > 5) return;
+        settings.current.pixelSize = 12 + 4 * value;
+    }, []);
 
     return (
         <Modal title="Settings"
@@ -33,12 +38,13 @@ export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.Re
                onOk={handleOkClick}
                onCancel={() => setIsShown(false)}>
             <Row gutter={8}>
-                <Col span={6}>Zoom</Col>
+                <Col span={6}>Grid Size</Col>
                 <Col span={18}>
-                    <Slider defaultValue={1}
+                    <Slider defaultValue={5}
                             min={1}
                             max={5}
-                            step={1} />
+                            step={1}
+                            onChange={handleGridSizeSliderChange} />
                 </Col>
             </Row>
         </Modal>
