@@ -6,7 +6,7 @@ import {WallNode} from "../../classes/node/WallNode";
 import {StartNode} from "../../classes/node/StartNode";
 import {TargetNode} from "../../classes/node/TargetNode";
 import produce from "immer";
-import {DoubleRightOutlined, LoginOutlined} from "@ant-design/icons";
+import {DoubleRightOutlined, LoginOutlined, LoadingOutlined} from "@ant-design/icons";
 import {IGridRefs} from "../../types/IRefs";
 import {GridTable} from "./GridTable";
 import {GridRow} from "./GridRow";
@@ -29,6 +29,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const [grid, setGrid] = useState<Node[][]>([]);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
     const [pixelSize, setPixelSize] = useState(32);
+    const [hasChanges, setHasChanges] = useState(false);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
     const startNode = useRef<Node>(new EmptyNode(0, 0));
@@ -112,24 +113,28 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     }, [grid, pathfindingFinished]);
 
     const createMaze = useCallback(async () => {
-        await clearAll();
-        const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
-        setGrid(newGrid);
+        if (hasChanges) {
+            notification.info({
+                message: "Clear grid before creating a maze!"
+            });
+            await new Promise(resolve => setTimeout(resolve, 100));
+        } else {
+            const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
+            setGrid(newGrid);
+        }
         mazeCreationFinished();
-    }, [grid, mazeCreationFinished, clearAll]);
+    }, [grid, mazeCreationFinished, hasChanges]);
 
     const changeEditMode = useCallback((editMode: EditMode) => {
         setEditMode(editMode);
     }, []);
 
     const changeSettings = useCallback(async (settings: ISettings) => {
-        setIsWorking(true);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 20));
         if (settings.pixelSize !== undefined) {
             await setPixelSize(settings.pixelSize);
         }
         await new Promise(resolve => setTimeout(resolve, 10));
-        setIsWorking(false);
     }, []);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
@@ -179,6 +184,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 break;
             }
         }
+        setHasChanges(true);
     }, [nodesToUpdate, editMode]);
 
     const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
