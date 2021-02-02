@@ -1,8 +1,9 @@
-import React, {forwardRef, useCallback, useImperativeHandle, useState} from "react";
+import React, {useContext, useState} from "react";
 import styled from "styled-components";
 import {Card, Space, Typography} from "antd";
 import {DoubleRightOutlined, LoginOutlined} from "@ant-design/icons";
-import {ILegendRefs} from "../types/IRefs";
+import {SettingsContext} from "./Context/SettingsContext";
+import produce from "immer";
 
 interface ILegendProps {
 
@@ -36,22 +37,18 @@ const Shortest = styled.div`
   transform: translateY(3px);
 `
 
-export const Legend: React.ForwardRefExoticComponent<ILegendProps & React.RefAttributes<ILegendRefs>> = forwardRef((props, refs) => {
-    const [isShown, setIsShown] = useState(false);
-
-    useImperativeHandle(refs, () => {
-       return {
-           toggleLegend,
-       }
-    });
-
-    const toggleLegend = useCallback(() => {
-        setIsShown((isShown) => !isShown);
-    }, []);
+export const Legend: React.FunctionComponent<ILegendProps> = () => {
+    const {settings, setSettings} = useContext(SettingsContext);
 
     return (
-        <Container className={isShown ? "" : "hide"}>
-            <Card title="Legend" size="small" extra={<Typography.Link onClick={() => setIsShown(false)}>Hide</Typography.Link>}>
+        <Container className={settings.legendShown ? "" : "hide"}>
+            <Card title="Legend"
+                  size="small"
+                  extra={
+                      <Typography.Link onClick={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {newSettings.legendShown = false}))}>
+                          Hide
+                      </Typography.Link>
+                  }>
                 <Space direction="vertical">
                     <Typography.Text><DoubleRightOutlined /> : Start Node</Typography.Text>
                     <Typography.Text><LoginOutlined /> : Target Node</Typography.Text>
@@ -61,4 +58,4 @@ export const Legend: React.ForwardRefExoticComponent<ILegendProps & React.RefAtt
             </Card>
         </Container>
     );
-})
+}

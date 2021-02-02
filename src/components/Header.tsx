@@ -1,9 +1,9 @@
-import React, {forwardRef, useCallback, useImperativeHandle, useState} from "react";
-import {Button, Divider, Popover, Select, Space, Typography} from "antd";
+import React, {useCallback, useContext, useState} from "react";
+import {Button, Divider, Select, Space, Typography} from "antd";
 import {InfoCircleOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
-import {IHeaderRefs} from "../types/IRefs";
+import {AlgorithmContext} from "./Context/AlgoirthmContext";
 
 interface IHeaderProps {
     onClickRunPathfinding: (algorithm: PathfindingAlgorithms) => void;
@@ -25,25 +25,15 @@ const HeaderContainer = styled.header`
     border-bottom: var(--border);
 `
 
-export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAttributes<IHeaderRefs>> = forwardRef(({onClickRunPathfinding}, refs) => {
+export const Header: React.FunctionComponent<IHeaderProps> = ({onClickRunPathfinding}) => {
     const [algorithm, setAlgorithm] = useState<PathfindingAlgorithms | undefined>(undefined);
-    const [isBusy, setIsBusy] = useState(false);
-
-    useImperativeHandle(refs, () => {
-        return {
-            setIsPageBusy
-        }
-    });
-
-    const setIsPageBusy = useCallback((isBusy: boolean) => {
-        setIsBusy(isBusy);
-    }, []);
+    const {isRunning} = useContext(AlgorithmContext);
 
     const handleRunPathfinding = useCallback(() => {
-        if (algorithm !== undefined && !isBusy) {
+        if (algorithm !== undefined && !isRunning) {
             onClickRunPathfinding(algorithm);
         }
-    }, [algorithm, isBusy, onClickRunPathfinding]);
+    }, [algorithm, isRunning, onClickRunPathfinding]);
 
     return (
         <HeaderContainer>
@@ -57,7 +47,7 @@ export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAtt
                             style={{display: algorithm === undefined ? "none" : ""}}/>
                     <Select placeholder="Select algorithm"
                             value={algorithm}
-                            disabled={isBusy}
+                            disabled={isRunning}
                             size="large"
                             onSelect={(value) => setAlgorithm(value)}
                             style={{width: 200}}>
@@ -68,11 +58,11 @@ export const Header: React.ForwardRefExoticComponent<IHeaderProps & React.RefAtt
                 </div>
                 <Button type="primary"
                         size="large"
-                        loading={isBusy}
+                        loading={isRunning}
                         disabled={algorithm === undefined}
                         onClick={() => handleRunPathfinding()}
                         style={{width: 100}}>Run!</Button>
             </Space>
         </HeaderContainer>
     );
-})
+}

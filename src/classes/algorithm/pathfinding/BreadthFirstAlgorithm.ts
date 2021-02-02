@@ -9,25 +9,21 @@ import {BreadthStartNode} from "../../node/breadth/BreadthStartNode";
 import {BreadthQueuedNode} from "../../node/breadth/BreadthQueuedNode";
 
 export class BreadthFirstAlgorithm extends Algorithm {
-    private operations: [number, number][];
+    private static operations: [number, number][] = [
+        [-1, 0],
+        [0, 1],
+        [1, 0],
+        [0, -1]
+    ];
 
-    constructor() {
-        super();
-
-        this.operations = [
-            [-1, 0],
-            [0, 1],
-            [1, 0],
-            [0, -1]
-        ];
-    }
-
-    public async run(startNode: Node, grid: Node[][], speed: number): Promise<Node[][]> {
+    public static async run(startNode: Node, grid: Node[][], speed: number): Promise<[Node[][], number]> {
+        let steps = 0;
         const queue = [startNode];
         const toUpdate: Node[] = [];
         let successful = false;
 
         while (queue.length > 0) {
+            steps++;
             const currentNode = queue.shift();
             if (currentNode !== undefined) {
                 if (currentNode instanceof BreadthQueuedNode) {
@@ -75,6 +71,6 @@ export class BreadthFirstAlgorithm extends Algorithm {
             throw new Error("Breadth First Algorithm could not find a valid path.");
         }
 
-        return newGrid;
+        return [newGrid, steps];
     }
 }

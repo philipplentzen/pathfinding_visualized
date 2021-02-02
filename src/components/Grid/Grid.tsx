@@ -1,13 +1,4 @@
-import React, {
-    forwardRef,
-    useCallback,
-    useContext,
-    useEffect,
-    useImperativeHandle,
-    useMemo,
-    useRef,
-    useState
-} from "react";
+import React, {forwardRef, useCallback, useContext, useImperativeHandle, useMemo, useRef, useState} from "react";
 import {EditMode} from "../../types/EditMode";
 import {EmptyNode} from "../../classes/node/EmptyNode";
 import {Node} from "../../classes/node/Node";
@@ -28,17 +19,19 @@ import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
 import {notification} from "antd";
 import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/RecursiveDivisionAlgorithm";
 import {SettingsContext} from "../Context/SettingsContext";
+import {EditModeContext} from "../Context/EditModeContext";
+import {AlgorithmContext} from "../Context/AlgoirthmContext";
 
 interface IGridProps {
-    pathfindingFinished: () => void;
-    mazeCreationFinished: () => void;
+
 }
 
-export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({pathfindingFinished, mazeCreationFinished}, refs) => {
+export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
     const [grid, setGrid] = useState<Node[][]>([]);
-    const [editMode, setEditMode] = useState(EditMode.DRAG);
     const [hasChanges, setHasChanges] = useState(false);
     const {settings} = useContext(SettingsContext);
+    const {setIsRunning} = useContext(AlgorithmContext);
+    const {editMode, setEditMode} = useContext(EditModeContext);
     const calculatedPixelSize = useRef(settings.pixelSize);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
@@ -53,8 +46,6 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             runPathfinding,
             clearAll,
             clearPath,
-            changeEditMode,
-            changeSettings,
             createMaze,
         }
     });
@@ -98,17 +89,19 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 message: "Pathfinding could not be started!",
                 description: "Whether start or target node is not set.",
             });
-            await new Promise(resolve => setTimeout(resolve, 100));
-            pathfindingFinished();
             return;
         }
+        setEditMode(EditMode.DRAG);
+        setIsRunning(true);
         try {
             let newGrid: Node[][] = [];
+            let steps = 0;
             switch (algorithm) {
                 case PathfindingAlgorithms.BREADTH:
-                    newGrid = await new BreadthFirstAlgorithm().run(startNode.current, _.cloneDeep(grid), 0);
+                    [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current, _.cloneDeep(grid), 0);
             }
             if (newGrid !== []) {
+                console.log(steps);
                 setGrid(newGrid);
             }
         } catch (error) {
@@ -119,8 +112,8 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 });
             }
         }
-        pathfindingFinished();
-    }, [grid, pathfindingFinished]);
+        setIsRunning(false);
+    }, [grid, setIsRunning, setEditMode]);
 
     const createMaze = useCallback(async () => {
         if (hasChanges) {
@@ -129,15 +122,13 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             });
             await new Promise(resolve => setTimeout(resolve, 100));
         } else {
+            setEditMode(EditMode.DRAG);
+            setIsRunning(true);
             const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
             setGrid(newGrid);
+            setIsRunning(false);
         }
-        mazeCreationFinished();
-    }, [grid, mazeCreationFinished, hasChanges]);
-
-    const changeEditMode = useCallback((editMode: EditMode) => {
-        setEditMode(editMode);
-    }, []);
+    }, [grid, setEditMode, setIsRunning, hasChanges]);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {

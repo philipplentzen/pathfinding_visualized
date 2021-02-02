@@ -1,8 +1,7 @@
-import React, {forwardRef, useCallback, useImperativeHandle, useRef} from "react";
+import React from "react";
 import styled from "styled-components";
 import {Header} from "./Header";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
-import {IHeaderRefs, ILayoutRefs} from "../types/IRefs";
 
 interface ILayoutProps extends React.ComponentPropsWithoutRef<any> {
     handleRunPathfinding: (algorithm: PathfindingAlgorithms) => void;
@@ -13,25 +12,13 @@ const Content = styled.main`
     height: calc(100% - 73px);
 `
 
-export const Layout: React.ForwardRefExoticComponent<ILayoutProps & React.RefAttributes<ILayoutRefs>> = forwardRef(({handleRunPathfinding, children}, refs) => {
-    const headerRef = useRef<IHeaderRefs>(null)
-
-    useImperativeHandle(refs, () => {
-        return {
-            setIsPageBusy,
-        }
-    });
-
-    const setIsPageBusy = useCallback((isBusy: boolean) => {
-        headerRef.current?.setIsPageBusy(isBusy);
-    }, []);
-
+export const Layout: React.FunctionComponent<ILayoutProps> = ({handleRunPathfinding, children}) => {
     return (
         <>
-            <Header ref={headerRef} onClickRunPathfinding={handleRunPathfinding}/>
+            <Header onClickRunPathfinding={handleRunPathfinding}/>
             <Content>
                 {children}
             </Content>
         </>
     )
-})
+}

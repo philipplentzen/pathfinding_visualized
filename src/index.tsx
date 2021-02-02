@@ -2,14 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 import "antd/dist/antd.css";
-import {Router} from "./Router";
 import {GlobalStyle} from "./styles/GlobalStyle";
 import * as serviceWorker from "./serviceWorker";
+import {AlgorithmPage} from "./pages/AlgorithmPage";
 
 ReactDOM.render(
   <React.StrictMode>
       <GlobalStyle />
-      <Router />
+      <AlgorithmPage />
   </React.StrictMode>,
   document.getElementById('root')
 );

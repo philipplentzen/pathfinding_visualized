@@ -13,6 +13,7 @@ export const Settings: React.FunctionComponent<ISettingsProps> = () => {
 
     const handleOkClick = useCallback(() => {
         setSettings(produce(settings, (newSettings) => {
+            newSettings.shown = false;
             newSettings.pixelSize = pixelSize;
         }));
     }, [settings, setSettings, pixelSize]);
