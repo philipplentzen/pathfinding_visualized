@@ -11,6 +11,7 @@ export const SettingsContext = React.createContext<ISettingsContext>({
         shown: false,
         pixelSize: 32,
         legendShown: true,
+        speed: 0,
     },
     setSettings: () => {}
 });

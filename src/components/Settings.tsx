@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useState} from "react";
-import {Col, Modal, Row, Slider} from "antd";
+import {Checkbox, Col, Modal, Row, Slider} from "antd";
 import {SettingsContext} from "./Context/SettingsContext";
 import produce from "immer";
 
@@ -22,15 +22,38 @@ export const Settings: React.FunctionComponent<ISettingsProps> = () => {
         <Modal title="Settings"
                visible={settings.shown}
                onOk={handleOkClick}
-               onCancel={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {newSettings.shown = false}))}>
+               onCancel={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {
+                   newSettings.shown = false;
+               }))}>
             <Row gutter={8}>
                 <Col span={6}>Grid Size</Col>
                 <Col span={18}>
                     <Slider defaultValue={(pixelSize - 12) / 4}
                             min={1}
-                            max={5}
+                            max={10}
                             step={1}
-                            onChange={(value: number) => setPixelSize(12 + 4 * value)} />
+                            onChange={(size: number) => setPixelSize(12 + 4 * size)} />
+                </Col>
+            </Row>
+            <Row gutter={8}>
+                <Col span={6}>Speed (Seconds)</Col>
+                <Col span={18}>
+                    <Slider defaultValue={settings.speed}
+                            min={0}
+                            max={10}
+                            step={1}
+                            onChange={(speed: number) => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {
+                                newSettings.speed = speed;
+                            }))} />
+                </Col>
+            </Row>
+            <Row gutter={8}>
+                <Col span={6}>Show legend</Col>
+                <Col span={18}>
+                    <Checkbox checked={settings.legendShown}
+                              onChange={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {
+                                  newSettings.legendShown = !oldSettings.legendShown;
+                              }))} />
                 </Col>
             </Row>
         </Modal>

@@ -10,7 +10,7 @@ export class RecursiveDivisionAlgorithm extends MazeAlgorithm {
         const toUpdate: Node[] = [];
         RecursiveDivisionAlgorithm.generateOuterWalls(toUpdate, height, width);
         RecursiveDivisionAlgorithm.generateInnerWalls(toUpdate, 1, height - 2, 1, width - 2, "horizontal");
-        return await RecursiveDivisionAlgorithm.draw(toUpdate, grid);
+        return await RecursiveDivisionAlgorithm.draw(toUpdate, grid, 0);
     }
 
     private static generateInnerWalls(toUpdate: Node[], minRow: number, maxRow: number, minColumn: number, maxColumn: number, direction: "horizontal" | "vertical"): void {

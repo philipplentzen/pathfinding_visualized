@@ -98,7 +98,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             let steps = 0;
             switch (algorithm) {
                 case PathfindingAlgorithms.BREADTH:
-                    [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current, _.cloneDeep(grid), 0);
+                    [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current, _.cloneDeep(grid), settings.speed);
             }
             if (newGrid !== []) {
                 console.log(steps);
@@ -113,7 +113,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             }
         }
         setIsRunning(false);
-    }, [grid, setIsRunning, setEditMode]);
+    }, [grid, setIsRunning, setEditMode, settings.speed]);
 
     const createMaze = useCallback(async () => {
         if (hasChanges) {
@@ -142,7 +142,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 cols -= 1;
             }
 
-            calculatedPixelSize.current = element.clientWidth / cols;
+            calculatedPixelSize.current = Math.min(element.clientWidth / cols, element.clientHeight / rows);
 
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }

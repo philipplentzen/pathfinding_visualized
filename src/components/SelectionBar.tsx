@@ -31,6 +31,7 @@ const Container = styled.div`
     
     padding: 8px 64px;
     background-color: var(--background-dark);
+    border-bottom: var(--border);
 `
 
 export const SelectionBar: React.FunctionComponent<ISelectionBarProps> = ({onClickClearAll, onClickClearPath, onClickCreateMaze}) => {

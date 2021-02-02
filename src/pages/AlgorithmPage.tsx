@@ -21,6 +21,7 @@ export const AlgorithmPage: React.FunctionComponent<IAlgorithmPageProps> = () =>
         shown: false,
         pixelSize: 32,
         legendShown: false,
+        speed: 0,
     });
     const [isRunning, setIsRunning] = useState(false);
     const [editMode, setEditMode] = useState(EditMode.DRAG);

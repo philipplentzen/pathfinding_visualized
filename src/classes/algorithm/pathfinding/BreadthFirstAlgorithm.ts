@@ -65,7 +65,7 @@ export class BreadthFirstAlgorithm extends Algorithm {
             }
         }
 
-        const newGrid = await BreadthFirstAlgorithm.draw(toUpdate, grid);
+        const newGrid = await BreadthFirstAlgorithm.draw(toUpdate, grid, speed);
 
         if (!successful) {
             throw new Error("Breadth First Algorithm could not find a valid path.");
