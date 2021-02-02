@@ -1,4 +1,4 @@
-import React, {forwardRef, useImperativeHandle, useState} from "react";
+import React, {forwardRef, useContext, useImperativeHandle, useState} from "react";
 import {Button, Divider, Space} from "antd";
 import {
     BuildOutlined,
@@ -13,11 +13,12 @@ import {
 import styled from "styled-components";
 import {EditMode} from "../types/EditMode";
 import {ISelectionBarRefs} from "../types/IRefs";
+import {SettingsContext} from "./Context/SettingsContext";
+import produce from "immer";
 
 interface ISelectionBarProps {
     onClickClearAll: () => void;
     onClickClearPath: () => void;
-    onShowSettings: () => void;
     onChangeEditMode: (editMode: EditMode) => void;
     onClickCreateMaze: () => void;
 }
@@ -32,9 +33,10 @@ const Container = styled.div`
     background-color: var(--background-dark);
 `
 
-export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClearAll, onClickClearPath, onShowSettings, onChangeEditMode, onClickCreateMaze}, refs) => {
+export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & React.RefAttributes<ISelectionBarRefs>> = forwardRef(({onClickClearAll, onClickClearPath, onChangeEditMode, onClickCreateMaze}, refs) => {
     const [isEditable, setIsEditable] = useState(true);
     const [editMode, setEditMode] = useState<EditMode>(EditMode.DRAG);
+    const {setSettings} = useContext(SettingsContext);
 
     useImperativeHandle(refs, () => {
         return {
@@ -111,7 +113,7 @@ export const SelectionBar: React.ForwardRefExoticComponent<ISelectionBarProps & 
                 <Button type="text"
                         size="small"
                         disabled={!isEditable}
-                        onClick={onShowSettings}
+                        onClick={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {newSettings.shown = true}))}
                         icon={<SettingOutlined />} />
             </Space>
         </Container>

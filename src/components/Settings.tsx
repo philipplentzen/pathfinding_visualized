@@ -1,52 +1,37 @@
-import React, {forwardRef, useCallback, useImperativeHandle, useRef, useState} from "react";
+import React, {useCallback, useContext, useState} from "react";
 import {Col, Modal, Row, Slider} from "antd";
-import {ISettingsRefs} from "../types/IRefs";
-import {ISettings} from "../types/ISettings";
+import {SettingsContext} from "./Context/SettingsContext";
+import produce from "immer";
 
 interface ISettingsProps {
-    onChangeSettings: (settings: ISettings) => void;
+
 }
 
-export const Settings: React.ForwardRefExoticComponent<ISettingsProps & React.RefAttributes<ISettingsRefs>> = forwardRef(({onChangeSettings}, refs) => {
-    const [isShown, setIsShown] = useState(false);
-    const settings = useRef<ISettings>({});
-
-    useImperativeHandle(refs, () => {
-        return {
-            showSettings,
-        }
-    });
-
-    const showSettings = useCallback(() => {
-        setIsShown(true);
-    }, []);
+export const Settings: React.FunctionComponent<ISettingsProps> = () => {
+    const {settings, setSettings} = useContext(SettingsContext);
+    const [pixelSize, setPixelSize] = useState(settings.pixelSize);
 
     const handleOkClick = useCallback(() => {
-        setIsShown(false);
-        onChangeSettings(settings.current);
-        settings.current = {};
-    }, [onChangeSettings]);
-
-    const handleGridSizeSliderChange = useCallback((value: number) => {
-        if (value < 1 || value > 5) return;
-        settings.current.pixelSize = 12 + 4 * value;
-    }, []);
+        setSettings(produce(settings, (newSettings) => {
+            newSettings.pixelSize = pixelSize;
+        }));
+    }, [settings, setSettings, pixelSize]);
 
     return (
         <Modal title="Settings"
-               visible={isShown}
+               visible={settings.shown}
                onOk={handleOkClick}
-               onCancel={() => setIsShown(false)}>
+               onCancel={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {newSettings.shown = false}))}>
             <Row gutter={8}>
                 <Col span={6}>Grid Size</Col>
                 <Col span={18}>
-                    <Slider defaultValue={5}
+                    <Slider defaultValue={(pixelSize - 12) / 4}
                             min={1}
                             max={5}
                             step={1}
-                            onChange={handleGridSizeSliderChange} />
+                            onChange={(value: number) => setPixelSize(12 + 4 * value)} />
                 </Col>
             </Row>
         </Modal>
     )
-})
+}

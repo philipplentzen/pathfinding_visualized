@@ -1,4 +1,13 @@
-import React, {forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState} from "react";
+import React, {
+    forwardRef,
+    useCallback,
+    useContext,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState
+} from "react";
 import {EditMode} from "../../types/EditMode";
 import {EmptyNode} from "../../classes/node/EmptyNode";
 import {Node} from "../../classes/node/Node";
@@ -6,7 +15,7 @@ import {WallNode} from "../../classes/node/WallNode";
 import {StartNode} from "../../classes/node/StartNode";
 import {TargetNode} from "../../classes/node/TargetNode";
 import produce from "immer";
-import {DoubleRightOutlined, LoginOutlined, LoadingOutlined} from "@ant-design/icons";
+import {DoubleRightOutlined, LoginOutlined} from "@ant-design/icons";
 import {IGridRefs} from "../../types/IRefs";
 import {GridTable} from "./GridTable";
 import {GridRow} from "./GridRow";
@@ -17,8 +26,8 @@ import {BreadthFirstAlgorithm} from "../../classes/algorithm/pathfinding/Breadth
 import * as _ from "lodash";
 import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
 import {notification} from "antd";
-import {ISettings} from "../../types/ISettings";
 import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/RecursiveDivisionAlgorithm";
+import {SettingsContext} from "../Context/SettingsContext";
 
 interface IGridProps {
     pathfindingFinished: () => void;
@@ -28,8 +37,9 @@ interface IGridProps {
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef(({pathfindingFinished, mazeCreationFinished}, refs) => {
     const [grid, setGrid] = useState<Node[][]>([]);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
-    const [pixelSize, setPixelSize] = useState(32);
     const [hasChanges, setHasChanges] = useState(false);
+    const {settings} = useContext(SettingsContext);
+    const calculatedPixelSize = useRef(settings.pixelSize);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
     const startNode = useRef<Node>(new EmptyNode(0, 0));
@@ -129,18 +139,10 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         setEditMode(editMode);
     }, []);
 
-    const changeSettings = useCallback(async (settings: ISettings) => {
-        await new Promise(resolve => setTimeout(resolve, 20));
-        if (settings.pixelSize !== undefined) {
-            await setPixelSize(settings.pixelSize);
-        }
-        await new Promise(resolve => setTimeout(resolve, 10));
-    }, []);
-
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
-            let rows: number = Math.floor(element.clientHeight / pixelSize);
-            let cols: number = Math.floor(element.clientWidth / pixelSize);
+            let rows: number = Math.floor(element.clientHeight / settings.pixelSize);
+            let cols: number = Math.floor(element.clientWidth / settings.pixelSize);
 
             if (rows % 2 === 0) {
                 rows -= 1;
@@ -149,11 +151,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 cols -= 1;
             }
 
-            setPixelSize(element.clientWidth / cols);
+            calculatedPixelSize.current = element.clientWidth / cols;
 
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }
-    }, [pixelSize]);
+    }, [settings.pixelSize]);
 
     const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();
@@ -228,7 +230,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                             <GridRow key={rowId}>
                                 {nodes.map((node) => (
                                     <GridCell key={node.getId()}
-                                              pixelSize={pixelSize}
+                                              pixelSize={calculatedPixelSize.current}
                                               className={node.toString()}
                                               id={node.getId()}
                                               onMouseDown={(event) => handleMouseDown(event, node.getRow(), node.getColumn())}

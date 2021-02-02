@@ -1,4 +1,5 @@
 export interface ISettings {
-    pixelSize?: number;
+    shown: boolean;
+    pixelSize: number;
     legendShown?: boolean;
 }
