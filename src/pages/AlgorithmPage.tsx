@@ -11,6 +11,7 @@ import {SettingsContext} from "../components/Context/SettingsContext";
 import {Layout} from "../components/Layout";
 import {ISettings} from "../types/ISettings";
 import {EditModeContext} from "../components/Context/EditModeContext";
+import {MazeAlgorithms} from "../types/MazeAlgorithms";
 
 interface IAlgorithmPageProps {
 
@@ -23,12 +24,13 @@ export const AlgorithmPage: React.FunctionComponent<IAlgorithmPageProps> = () =>
         legendShown: false,
         speed: 0,
     });
+    const [isRunnable, setIsRunnable] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
     const gridRef = useRef<IGridRefs>(null);
 
-    const handleRunPathfinding = useCallback((algorithm: PathfindingAlgorithms) => {
-        gridRef.current?.runPathfinding(algorithm);
+    const handleRunAlgorithm = useCallback((algorithm: PathfindingAlgorithms | MazeAlgorithms) => {
+        gridRef.current?.runAlgorithm(algorithm);
     }, []);
 
     const handleClearAll = useCallback(() => {
@@ -39,18 +41,14 @@ export const AlgorithmPage: React.FunctionComponent<IAlgorithmPageProps> = () =>
         gridRef.current?.clearPath();
     }, []);
 
-    const handleCreateMaze = useCallback(() => {
-        gridRef.current?.createMaze();
-    }, []);
-
     return (
         <SettingsContext.Provider value={{settings, setSettings}}>
-            <AlgorithmContext.Provider value={{isRunning, setIsRunning}}>
-                <Layout handleRunPathfinding={handleRunPathfinding}>
+            <AlgorithmContext.Provider value={{isRunnable, isRunning, setIsRunnable, setIsRunning}}>
+                <Layout handleRunPathfinding={handleRunAlgorithm}>
                     <EditModeContext.Provider value={{editMode, setEditMode}}>
                         <SelectionBar onClickClearAll={handleClearAll}
                                       onClickClearPath={handleClearPath}
-                                      onClickCreateMaze={handleCreateMaze} />
+                                      onClickCreateMaze={() => handleRunAlgorithm(MazeAlgorithms.RECURSIVE_MAZE)} />
                         <Grid ref={gridRef} />
                     </EditModeContext.Provider>
                     <Legend />

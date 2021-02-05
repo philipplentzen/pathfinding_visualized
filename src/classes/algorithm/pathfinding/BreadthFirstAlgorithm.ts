@@ -7,6 +7,7 @@ import {BreadthTargetNode} from "../../node/breadth/BreadthTargetNode";
 import {ShortestNode} from "../../node/ShortestNode";
 import {BreadthStartNode} from "../../node/breadth/BreadthStartNode";
 import {BreadthQueuedNode} from "../../node/breadth/BreadthQueuedNode";
+import * as _ from "lodash";
 
 export class BreadthFirstAlgorithm extends Algorithm {
     private static operations: [number, number][] = [
@@ -17,6 +18,7 @@ export class BreadthFirstAlgorithm extends Algorithm {
     ];
 
     public static async run(startNode: Node, grid: Node[][], speed: number): Promise<[Node[][], number]> {
+        const cleanGrid = _.cloneDeep(grid);
         let steps = 0;
         const queue = [startNode];
         const toUpdate: Node[] = [];
@@ -65,7 +67,7 @@ export class BreadthFirstAlgorithm extends Algorithm {
             }
         }
 
-        const newGrid = await BreadthFirstAlgorithm.draw(toUpdate, grid, speed);
+        const newGrid = await BreadthFirstAlgorithm.draw(toUpdate, cleanGrid, speed);
 
         if (!successful) {
             throw new Error("Breadth First Algorithm could not find a valid path.");

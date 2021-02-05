@@ -1,10 +1,10 @@
 import {PathfindingAlgorithms} from "./PathfindingAlgorithms";
+import {MazeAlgorithms} from "./MazeAlgorithms";
 
 export interface IGridRefs {
-    runPathfinding: (algorithm: PathfindingAlgorithms) => void;
+    runAlgorithm: (algorithm: PathfindingAlgorithms | MazeAlgorithms) => void;
     clearAll: () => void;
     clearPath: () => void;
-    createMaze: () => void;
 }
 
 export interface ISelectionBarRefs {

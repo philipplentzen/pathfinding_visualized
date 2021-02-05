@@ -4,6 +4,7 @@ import {InfoCircleOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
 import {AlgorithmContext} from "./Context/AlgoirthmContext";
+import {Algorithm} from "../classes/algorithm/Algorithm";
 
 interface IHeaderProps {
     onClickRunPathfinding: (algorithm: PathfindingAlgorithms) => void;
@@ -27,9 +28,12 @@ const HeaderContainer = styled.header`
 
 export const Header: React.FunctionComponent<IHeaderProps> = ({onClickRunPathfinding}) => {
     const [algorithm, setAlgorithm] = useState<PathfindingAlgorithms | undefined>(undefined);
-    const {isRunning} = useContext(AlgorithmContext);
+    const {isRunnable, isRunning} = useContext(AlgorithmContext);
 
     const handleRunPathfinding = useCallback(() => {
+        if (isRunning) {
+            Algorithm.isStopped = true;
+        }
         if (algorithm !== undefined && !isRunning) {
             onClickRunPathfinding(algorithm);
         }
@@ -58,10 +62,12 @@ export const Header: React.FunctionComponent<IHeaderProps> = ({onClickRunPathfin
                 </div>
                 <Button type="primary"
                         size="large"
-                        loading={isRunning}
-                        disabled={algorithm === undefined}
+                        danger={isRunning}
+                        disabled={(algorithm === undefined || !isRunnable) && !isRunning}
                         onClick={() => handleRunPathfinding()}
-                        style={{width: 100}}>Run!</Button>
+                        style={{width: 100}}>
+                    {isRunning ? "Stop!" : "Run!"}
+                </Button>
             </Space>
         </HeaderContainer>
     );

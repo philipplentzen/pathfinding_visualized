@@ -21,6 +21,7 @@ import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/Recursive
 import {SettingsContext} from "../Context/SettingsContext";
 import {EditModeContext} from "../Context/EditModeContext";
 import {AlgorithmContext} from "../Context/AlgoirthmContext";
+import {MazeAlgorithms} from "../../types/MazeAlgorithms";
 
 interface IGridProps {
 
@@ -30,23 +31,22 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const [grid, setGrid] = useState<Node[][]>([]);
     const [hasChanges, setHasChanges] = useState(false);
     const {settings} = useContext(SettingsContext);
-    const {setIsRunning} = useContext(AlgorithmContext);
+    const {isRunnable, setIsRunnable, setIsRunning} = useContext(AlgorithmContext);
     const {editMode, setEditMode} = useContext(EditModeContext);
     const calculatedPixelSize = useRef(settings.pixelSize);
     const isPressed = useRef(false);
     const isDrawing = useRef(false);
-    const startNode = useRef<Node>(new EmptyNode(0, 0));
-    const targetNode = useRef<Node>(new EmptyNode(0, 0));
+    const startNode = useRef<StartNode | undefined>(undefined);
+    const targetNode = useRef<TargetNode | undefined>(undefined);
     const nodesToUpdate = useMemo<Node[]>(() => {
         return [];
     }, undefined);
 
     useImperativeHandle(refs, () => {
         return {
-            runPathfinding,
+            runAlgorithm,
             clearAll,
             clearPath,
-            createMaze,
         }
     });
 
@@ -83,52 +83,28 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         await new Promise(resolve => setTimeout(resolve, 0));
     }, []);
 
-    const runPathfinding = useCallback( async (algorithm: PathfindingAlgorithms) => {
-        if (!(startNode.current instanceof StartNode) || !(targetNode.current instanceof TargetNode)) {
-            notification.error({
-                message: "Pathfinding could not be started!",
-                description: "Whether start or target node is not set.",
-            });
-            return;
-        }
+    const runAlgorithm = useCallback(async (algorithm: PathfindingAlgorithms | MazeAlgorithms) => {
+        let newGrid: Node[][] = [];
+        let steps = 0;
+        let error: Error | undefined = undefined;
+
         setEditMode(EditMode.DRAG);
         setIsRunning(true);
-        try {
-            let newGrid: Node[][] = [];
-            let steps = 0;
-            switch (algorithm) {
-                case PathfindingAlgorithms.BREADTH:
-                    [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current, _.cloneDeep(grid), settings.speed);
-            }
-            if (newGrid !== []) {
-                console.log(steps);
-                setGrid(newGrid);
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                notification.error({
-                    message: "Pathfinding failed!",
-                    description: error.message,
-                });
-            }
-        }
-        setIsRunning(false);
-    }, [grid, setIsRunning, setEditMode, settings.speed]);
 
-    const createMaze = useCallback(async () => {
-        if (hasChanges) {
-            notification.info({
-                message: "Clear grid before creating a maze!"
-            });
-            await new Promise(resolve => setTimeout(resolve, 100));
-        } else {
-            setEditMode(EditMode.DRAG);
-            setIsRunning(true);
-            const newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
-            setGrid(newGrid);
-            setIsRunning(false);
+        switch (algorithm) {
+            case PathfindingAlgorithms.BREADTH: {
+                [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current!, _.cloneDeep(grid), settings.speed);
+                break;
+            }
+            case MazeAlgorithms.RECURSIVE_MAZE:
+                newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
         }
-    }, [grid, setEditMode, setIsRunning, hasChanges]);
+
+        console.log(steps);
+
+        setGrid(newGrid);
+        setIsRunning(false);
+    }, [grid, setGrid, settings.speed, setEditMode, setIsRunning]);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
@@ -159,26 +135,39 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 break;
             }
             case EditMode.START: {
-                const isPresent = event.currentTarget.classList.toggle("start");
-                const newNode = isPresent ? new StartNode(row, column) : new EmptyNode(row, column);
-                setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    newGrid[row][column] = newNode;
-                }));
-                startNode.current = newNode;
+                if (startNode.current == null) {
+                    const newNode = new StartNode(row, column)
+                    setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+                        newGrid[row][column] = newNode;
+                    }));
+                    startNode.current = newNode;
+                } else if (startNode.current.getRow() === row && startNode.current.getColumn() === column) {
+                    setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+                        newGrid[row][column] = new EmptyNode(row, column);
+                    }));
+                    startNode.current = undefined;
+                }
                 break;
             }
             case EditMode.TARGET: {
-                const isPresent = event.currentTarget.classList.toggle("target");
-                const newNode = isPresent ? new TargetNode(row, column) : new EmptyNode(row, column);
-                setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
-                    newGrid[row][column] = newNode;
-                }));
-                targetNode.current = newNode;
+                if (targetNode.current == null) {
+                    const newNode = new TargetNode(row, column)
+                    setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+                        newGrid[row][column] = newNode;
+                    }));
+                    targetNode.current = newNode;
+                } else if (targetNode.current.getRow() === row && targetNode.current.getColumn() === column) {
+                    setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
+                        newGrid[row][column] = new EmptyNode(row, column);
+                    }));
+                    targetNode.current = undefined;
+                }
                 break;
             }
         }
+        setIsRunnable(startNode.current != null && targetNode.current != null);
         setHasChanges(true);
-    }, [nodesToUpdate, editMode]);
+    }, [nodesToUpdate, editMode, setIsRunnable]);
 
     const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();
