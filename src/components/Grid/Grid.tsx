@@ -16,7 +16,6 @@ import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
 import {BreadthFirstAlgorithm} from "../../classes/algorithm/pathfinding/BreadthFirstAlgorithm";
 import * as _ from "lodash";
 import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
-import {notification} from "antd";
 import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/RecursiveDivisionAlgorithm";
 import {SettingsContext} from "../Context/SettingsContext";
 import {EditModeContext} from "../Context/EditModeContext";
@@ -29,9 +28,8 @@ interface IGridProps {
 
 export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttributes<IGridRefs>> = forwardRef((props, refs) => {
     const [grid, setGrid] = useState<Node[][]>([]);
-    const [alreadyCreatedMaze, setAlreadyCreatedMaze] = useState(false);
     const {settings} = useContext(SettingsContext);
-    const {setIsRunnable, setIsRunning} = useContext(AlgorithmContext);
+    const {setIsRunnable, setIsRunning, setHasChanges, setHasPath} = useContext(AlgorithmContext);
     const {editMode, setEditMode} = useContext(EditModeContext);
     const calculatedPixelSize = useRef(settings.pixelSize);
     const isPressed = useRef(false);
@@ -62,10 +60,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         targetNode.current = undefined;
 
         setIsRunnable(false);
-        setAlreadyCreatedMaze(false);
+        setHasChanges(false);
+        setHasPath(false);
 
         await new Promise(resolve => setTimeout(resolve, 0));
-    }, [setIsRunnable, setAlreadyCreatedMaze]);
+    }, [setIsRunnable, setHasChanges, setHasPath]);
 
     const clearPath = useCallback(async () => {
         setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
@@ -90,16 +89,15 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
         }));
 
         setIsRunnable(startNode.current != null && targetNode.current != null);
+        setHasPath(false);
 
         await new Promise(resolve => setTimeout(resolve, 0));
-    }, [setIsRunnable]);
+    }, [setIsRunnable, setHasPath]);
 
     const runAlgorithm = useCallback(async (algorithm: PathfindingAlgorithms | MazeAlgorithms) => {
         let newGrid: Node[][] = grid;
         let steps = 0;
         let error: Error | undefined = undefined;
-
-        console.log("run", algorithm);
 
         setEditMode(EditMode.DRAG);
         setIsRunning(true);
@@ -108,20 +106,18 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             case PathfindingAlgorithms.BREADTH: {
                 [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current!, _.cloneDeep(grid), settings.speed);
                 setIsRunnable(false);
+                setHasPath(true);
                 break;
             }
-            case MazeAlgorithms.RECURSIVE_MAZE:
-                if (!alreadyCreatedMaze) {
-                    newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
-                    setAlreadyCreatedMaze(true);
-                }
+            case MazeAlgorithms.RECURSIVE_MAZE: {
+                newGrid = await RecursiveDivisionAlgorithm.run(_.cloneDeep(grid));
+                setHasChanges(true);
+            }
         }
-
-        console.log(steps);
 
         setGrid(newGrid);
         setIsRunning(false);
-    }, [grid, setGrid, settings.speed, setEditMode, setIsRunning, alreadyCreatedMaze, setIsRunnable, setAlreadyCreatedMaze]);
+    }, [grid, setGrid, settings.speed, setEditMode, setIsRunning, setIsRunnable, setHasChanges, setHasPath]);
 
     const buildGrid = useCallback((element: HTMLDivElement | null) => {
         if (element !== null) {
@@ -137,9 +133,14 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
             calculatedPixelSize.current = Math.min(element.clientWidth / cols, element.clientHeight / rows);
 
+            startNode.current = undefined;
+            targetNode.current = undefined;
+
+            setIsRunnable(false);
+            setHasChanges(false);
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }
-    }, [settings.pixelSize]);
+    }, [settings.pixelSize, setIsRunnable, setHasChanges]);
 
     const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();
@@ -149,10 +150,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 nodesToUpdate.push(isPresent ? new WallNode(row, column) : new EmptyNode(row, column));
                 isPressed.current = true;
                 isDrawing.current = isPresent;
+                setHasChanges(true);
                 break;
             }
             case EditMode.START: {
-                if (startNode.current == null) {
+                if (startNode.current === undefined) {
                     const newNode = new StartNode(row, column)
                     setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
                         newGrid[row][column] = newNode;
@@ -164,10 +166,11 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                     }));
                     startNode.current = undefined;
                 }
+                setHasChanges(true);
                 break;
             }
             case EditMode.TARGET: {
-                if (targetNode.current == null) {
+                if (targetNode.current === undefined) {
                     const newNode = new TargetNode(row, column)
                     setGrid((oldGrid) => produce(oldGrid, (newGrid) => {
                         newGrid[row][column] = newNode;
@@ -179,11 +182,12 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                     }));
                     targetNode.current = undefined;
                 }
+                setHasChanges(true);
                 break;
             }
         }
         setIsRunnable(startNode.current != null && targetNode.current != null);
-    }, [nodesToUpdate, editMode, setIsRunnable]);
+    }, [nodesToUpdate, editMode, setIsRunnable, setHasChanges]);
 
     const handleMouseOver = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();

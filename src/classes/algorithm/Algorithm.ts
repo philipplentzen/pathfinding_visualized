@@ -6,7 +6,7 @@ export abstract class Algorithm {
     protected static async draw(toUpdate: Node[], grid: Node[][], speed: number): Promise<Node[][]> {
         while (toUpdate.length > 0) {
             if (Algorithm.isStopped) {
-                Algorithm.isStopped = true;
+                Algorithm.isStopped = false;
                 return grid;
             }
 

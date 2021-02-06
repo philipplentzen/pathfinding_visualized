@@ -26,6 +26,8 @@ export const AlgorithmPage: React.FunctionComponent<IAlgorithmPageProps> = () =>
     });
     const [isRunnable, setIsRunnable] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+    const [hasPath, setHasPath] = useState(false);
     const [editMode, setEditMode] = useState(EditMode.DRAG);
     const gridRef = useRef<IGridRefs>(null);
 
@@ -41,9 +43,20 @@ export const AlgorithmPage: React.FunctionComponent<IAlgorithmPageProps> = () =>
         gridRef.current?.clearPath();
     }, []);
 
+    const algorithmContext = {
+        isRunnable,
+        isRunning,
+        hasChanges,
+        hasPath,
+        setIsRunnable,
+        setIsRunning,
+        setHasChanges,
+        setHasPath
+    }
+
     return (
         <SettingsContext.Provider value={{settings, setSettings}}>
-            <AlgorithmContext.Provider value={{isRunnable, isRunning, setIsRunnable, setIsRunning}}>
+            <AlgorithmContext.Provider value={algorithmContext}>
                 <Layout handleRunPathfinding={handleRunAlgorithm}>
                     <EditModeContext.Provider value={{editMode, setEditMode}}>
                         <SelectionBar onClickClearAll={handleClearAll}

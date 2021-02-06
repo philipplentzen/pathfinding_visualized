@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext} from "react";
 import {Button, Divider, Space} from "antd";
 import {
     BuildOutlined,
@@ -36,7 +36,7 @@ const Container = styled.div`
 
 export const SelectionBar: React.FunctionComponent<ISelectionBarProps> = ({onClickClearAll, onClickClearPath, onClickCreateMaze}) => {
     const {setSettings} = useContext(SettingsContext);
-    const {isRunning} = useContext(AlgorithmContext);
+    const {isRunning,  hasChanges, hasPath} = useContext(AlgorithmContext);
     const {editMode, setEditMode} = useContext(EditModeContext);
 
     return (
@@ -74,7 +74,7 @@ export const SelectionBar: React.FunctionComponent<ISelectionBarProps> = ({onCli
                 <Space>
                     <Button type="text"
                             size="small"
-                            disabled={isRunning}
+                            disabled={isRunning || hasChanges}
                             onClick={onClickCreateMaze}
                             icon={<BuildOutlined />}>
                         Random Maze
@@ -84,7 +84,7 @@ export const SelectionBar: React.FunctionComponent<ISelectionBarProps> = ({onCli
             <Space split={<Divider type="vertical" />}>
                 <Button type="text"
                         size="small"
-                        disabled={isRunning}
+                        disabled={isRunning || !hasPath}
                         onClick={onClickClearPath}
                         icon={<RiseOutlined />}>
                     Clear Path
@@ -92,7 +92,7 @@ export const SelectionBar: React.FunctionComponent<ISelectionBarProps> = ({onCli
                 <Button type="text"
                         danger
                         size="small"
-                        disabled={isRunning}
+                        disabled={isRunning || !hasChanges}
                         onClick={onClickClearAll}
                         icon={<CloseOutlined />}>
                     Clear All
