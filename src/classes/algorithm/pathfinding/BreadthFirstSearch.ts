@@ -2,14 +2,16 @@ import {Algorithm} from "../Algorithm";
 import {Node} from "../../node/Node";
 import {TargetNode} from "../../node/TargetNode";
 import {EmptyNode} from "../../node/EmptyNode";
-import {BreadthNode} from "../../node/breadth/BreadthNode";
-import {BreadthTargetNode} from "../../node/breadth/BreadthTargetNode";
 import {ShortestNode} from "../../node/ShortestNode";
-import {BreadthStartNode} from "../../node/breadth/BreadthStartNode";
-import {BreadthQueuedNode} from "../../node/breadth/BreadthQueuedNode";
 import * as _ from "lodash";
+import {StartNode} from "../../node/StartNode";
+import {QueuedNode} from "../../node/path/QueuedNode";
+import {PathTargetNode} from "../../node/path/PathTargetNode";
+import {PathNode} from "../../node/path/PathNode";
+import {VisitedNode} from "../../node/path/VisitedNode";
+import {PathStartNode} from "../../node/path/PathStartNode";
 
-export class BreadthFirstAlgorithm extends Algorithm {
+export class BreadthFirstSearch extends Algorithm {
     private static operations: [number, number][] = [
         [-1, 0],
         [0, 1],
@@ -17,29 +19,28 @@ export class BreadthFirstAlgorithm extends Algorithm {
         [0, -1]
     ];
 
-    public static async run(startNode: Node, grid: Node[][], speed: number): Promise<[Node[][], number]> {
+    public static async run(startNode: StartNode, grid: Node[][], speed: number): Promise<[Node[][], number]> {
         const cleanGrid = _.cloneDeep(grid);
         let steps = 0;
-        const queue = [startNode];
+        const queue: Node[] = [startNode];
         const toUpdate: Node[] = [];
-        let successful = false;
 
         while (queue.length > 0) {
             steps++;
             const currentNode = queue.shift();
             if (currentNode !== undefined) {
-                if (currentNode instanceof BreadthQueuedNode) {
-                    toUpdate.push(new BreadthNode(currentNode.getRow(), currentNode.getColumn(), currentNode.getPrevNode()));
-                } else if (currentNode instanceof BreadthTargetNode) {
-                    successful = true;
+                if (currentNode instanceof QueuedNode) {
+                    toUpdate.push(new VisitedNode(currentNode.getRow(), currentNode.getColumn(), currentNode.getPrevNode()));
+                } else if (currentNode instanceof PathTargetNode) {
+                    // successful = true;
                     let prevNode = currentNode.getPrevNode();
 
-                    while (prevNode instanceof BreadthNode) {
+                    while (prevNode instanceof PathNode) {
                         toUpdate.push(new ShortestNode(prevNode.getRow(), prevNode.getColumn()));
                         prevNode = prevNode.getPrevNode();
                     }
 
-                    toUpdate.push(new BreadthStartNode(prevNode.getRow(), prevNode.getColumn()));
+                    toUpdate.push(new PathStartNode(prevNode.getRow(), prevNode.getColumn()));
 
                     break;
                 }
@@ -52,9 +53,9 @@ export class BreadthFirstAlgorithm extends Algorithm {
                         let newNode = grid[newRow][newColumn];
 
                         if (newNode instanceof TargetNode) {
-                            newNode = new BreadthTargetNode(newRow, newColumn, currentNode);
+                            newNode = new PathTargetNode(newRow, newColumn, currentNode);
                         } else if (newNode instanceof EmptyNode) {
-                            newNode = new BreadthQueuedNode(newRow, newColumn, currentNode);
+                            newNode = new QueuedNode(newRow, newColumn, currentNode);
                         }
 
                         if (newNode !== grid[newRow][newColumn]) {
@@ -67,11 +68,7 @@ export class BreadthFirstAlgorithm extends Algorithm {
             }
         }
 
-        const newGrid = await BreadthFirstAlgorithm.draw(toUpdate, cleanGrid, speed);
-
-        if (!successful) {
-            throw new Error("Breadth First Algorithm could not find a valid path.");
-        }
+        const newGrid = await BreadthFirstSearch.draw(toUpdate, cleanGrid, speed);
 
         return [newGrid, steps];
     }

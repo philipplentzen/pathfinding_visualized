@@ -1,7 +1,7 @@
 import {TargetNode} from "../TargetNode";
 import {Node} from "../Node";
 
-export class BreadthTargetNode extends TargetNode {
+export class PathTargetNode extends TargetNode {
     private prevNode: Node;
 
     constructor(row: number, column: number, prevNode: Node) {
@@ -14,7 +14,7 @@ export class BreadthTargetNode extends TargetNode {
     }
 
     public toString(): string {
-        return "breadth shortest target";
+        return "shortest target";
     }
 
 }

@@ -1,7 +1,7 @@
 import {Node} from "../Node";
 
-export class BreadthNode extends Node {
-    private prevNode: Node;
+export class PathNode extends Node {
+    private readonly prevNode: Node;
 
     constructor(row: number, column: number, prevNode: Node) {
         super(row, column);
@@ -13,7 +13,6 @@ export class BreadthNode extends Node {
     }
 
     public toString(): string {
-        return "breadth";
+        return "path";
     }
-
 }

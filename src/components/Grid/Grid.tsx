@@ -13,7 +13,7 @@ import {GridRow} from "./GridRow";
 import {GridCell} from "./GridCell";
 import {GridContainer} from "./GridContainer";
 import {TransformComponent, TransformWrapper} from "react-zoom-pan-pinch";
-import {BreadthFirstAlgorithm} from "../../classes/algorithm/pathfinding/BreadthFirstAlgorithm";
+import {BreadthFirstSearch} from "../../classes/algorithm/pathfinding/BreadthFirstSearch";
 import * as _ from "lodash";
 import {PathfindingAlgorithms} from "../../types/PathfindingAlgorithms";
 import {RecursiveDivisionAlgorithm} from "../../classes/algorithm/maze/RecursiveDivisionAlgorithm";
@@ -21,6 +21,7 @@ import {SettingsContext} from "../Context/SettingsContext";
 import {EditModeContext} from "../Context/EditModeContext";
 import {AlgorithmContext} from "../Context/AlgoirthmContext";
 import {MazeAlgorithms} from "../../types/MazeAlgorithms";
+import {DepthFirstSearch} from "../../classes/algorithm/pathfinding/DepthFirstSearch";
 
 interface IGridProps {
 
@@ -104,7 +105,13 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
         switch (algorithm) {
             case PathfindingAlgorithms.BREADTH: {
-                [newGrid, steps] = await BreadthFirstAlgorithm.run(startNode.current!, _.cloneDeep(grid), settings.speed);
+                [newGrid, steps] = await BreadthFirstSearch.run(startNode.current!, _.cloneDeep(grid), settings.speed);
+                setIsRunnable(false);
+                setHasPath(true);
+                break;
+            }
+            case PathfindingAlgorithms.DEPTH: {
+                [newGrid, steps] = await DepthFirstSearch.run(startNode.current!, _.cloneDeep(grid), settings.speed);
                 setIsRunnable(false);
                 setHasPath(true);
                 break;
@@ -138,6 +145,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
 
             setIsRunnable(false);
             setHasChanges(false);
+            setHasPath(false);
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }
     }, [settings.pixelSize, setIsRunnable, setHasChanges]);
