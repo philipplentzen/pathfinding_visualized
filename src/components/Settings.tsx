@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useState} from "react";
-import {Checkbox, Col, Modal, Row, Slider} from "antd";
+import {Button, Checkbox, Col, Modal, Row, Slider, Typography} from "antd";
 import {SettingsContext} from "./Context/SettingsContext";
 import produce from "immer";
 
@@ -10,6 +10,12 @@ interface ISettingsProps {
 export const Settings: React.FunctionComponent<ISettingsProps> = () => {
     const {settings, setSettings} = useContext(SettingsContext);
     const [pixelSize, setPixelSize] = useState(settings.pixelSize);
+    
+    const handleCancelClick = useCallback(() => {
+        setSettings((oldSettings) => produce(oldSettings, (newSettings) => {
+            newSettings.shown = false;
+        }))
+    }, [setSettings]);
 
     const handleOkClick = useCallback(() => {
         setSettings(produce(settings, (newSettings) => {
@@ -21,10 +27,8 @@ export const Settings: React.FunctionComponent<ISettingsProps> = () => {
     return (
         <Modal title="Settings"
                visible={settings.shown}
-               onOk={handleOkClick}
-               onCancel={() => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {
-                   newSettings.shown = false;
-               }))}>
+               onCancel={handleCancelClick}
+               onOk={handleOkClick}>
             <Row gutter={8}>
                 <Col span={6}>Grid Size</Col>
                 <Col span={18}>
@@ -32,7 +36,9 @@ export const Settings: React.FunctionComponent<ISettingsProps> = () => {
                             min={1}
                             max={10}
                             step={1}
-                            onChange={(size: number) => setPixelSize(12 + 4 * size)} />
+                            onChange={(size: number) => {
+                                setPixelSize(12 + 4 * size);
+                            }} />
                 </Col>
             </Row>
             <Row gutter={8}>
