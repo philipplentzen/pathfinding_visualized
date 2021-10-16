@@ -16,8 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -33,4 +32,4 @@ jobs:
     - name: Cache
       uses: actions/cache@v2.1.6
       with:
-        path: "public"
+        path: "build"
