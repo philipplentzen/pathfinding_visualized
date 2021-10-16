@@ -32,4 +32,4 @@ jobs:
     - name: Cache
       uses: actions/cache@v2.1.6
       with:
-        path: "build"
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
