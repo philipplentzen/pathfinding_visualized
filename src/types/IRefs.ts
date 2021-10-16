@@ -6,7 +6,3 @@ export interface IGridRefs {
     clearAll: () => void;
     clearPath: () => void;
 }
-
-export interface ISelectionBarRefs {
-    setIsEditable: (isEditable: boolean) => void;
-}

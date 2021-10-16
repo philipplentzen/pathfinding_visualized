@@ -32,7 +32,6 @@ export class BreadthFirstSearch extends Algorithm {
                 if (currentNode instanceof QueuedNode) {
                     toUpdate.push(new VisitedNode(currentNode.getRow(), currentNode.getColumn(), currentNode.getPrevNode()));
                 } else if (currentNode instanceof PathTargetNode) {
-                    // successful = true;
                     let prevNode = currentNode.getPrevNode();
 
                     while (prevNode instanceof PathNode) {

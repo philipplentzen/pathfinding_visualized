@@ -15,7 +15,7 @@ export abstract class Algorithm {
                 document.getElementById(node.getId())!.classList.add(...node.toString().split(" "));
                 grid[node.getRow()][node.getColumn()] = node;
 
-                await new Promise(resolve => setTimeout(resolve, speed * 1000));
+                await new Promise(resolve => setTimeout(resolve, speed));
             }
         }
 

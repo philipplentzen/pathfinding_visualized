@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useState} from "react";
-import {Button, Checkbox, Col, Modal, Row, Slider, Typography} from "antd";
+import {Checkbox, Col, Modal, Row, Slider} from "antd";
 import {SettingsContext} from "./Context/SettingsContext";
 import produce from "immer";
 
@@ -42,12 +42,12 @@ export const Settings: React.FunctionComponent<ISettingsProps> = () => {
                 </Col>
             </Row>
             <Row gutter={8}>
-                <Col span={6}>Speed (Seconds)</Col>
+                <Col span={6}>Speed (MS)</Col>
                 <Col span={18}>
                     <Slider defaultValue={settings.speed}
                             min={0}
-                            max={10}
-                            step={1}
+                            max={1000}
+                            step={100}
                             onChange={(speed: number) => setSettings((oldSettings) => produce(oldSettings, (newSettings) => {
                                 newSettings.speed = speed;
                             }))} />

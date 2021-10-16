@@ -36,7 +36,6 @@ export class DepthFirstSearch extends Algorithm {
                     toUpdate.push(newNode)
                     grid[currentNode.getRow()][currentNode.getColumn()] = newNode;
                 } else if (currentNode instanceof PathTargetNode) {
-                    // successful = true;
                     let prevNode = currentNode.getPrevNode();
 
                     while (prevNode instanceof PathNode) {
