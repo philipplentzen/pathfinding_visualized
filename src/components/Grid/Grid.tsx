@@ -39,7 +39,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const targetNode = useRef<TargetNode | undefined>(undefined);
     const nodesToUpdate = useMemo<Node[]>(() => {
         return [];
-    }, undefined);
+    }, []);
 
     useImperativeHandle(refs, () => {
         return {
@@ -98,7 +98,6 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
     const runAlgorithm = useCallback(async (algorithm: PathfindingAlgorithms | MazeAlgorithms) => {
         let newGrid: Node[][] = grid;
         let steps = 0;
-        let error: Error | undefined = undefined;
 
         setEditMode(EditMode.DRAG);
         setIsRunning(true);
@@ -121,6 +120,8 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
                 setHasChanges(true);
             }
         }
+
+        console.log(steps)
 
         setGrid(newGrid);
         setIsRunning(false);
@@ -148,7 +149,7 @@ export const Grid: React.ForwardRefExoticComponent<IGridProps & React.RefAttribu
             setHasPath(false);
             setGrid(Array.from(Array(rows), (value, row) => Array.from(Array(cols), (value, column) => new EmptyNode(row, column))));
         }
-    }, [settings.pixelSize, setIsRunnable, setHasChanges]);
+    }, [settings.pixelSize, setIsRunnable, setHasChanges, setHasPath]);
 
     const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>, row: number, column: number) => {
         event.preventDefault();

@@ -71,6 +71,6 @@ export class DepthFirstSearch extends Algorithm {
 
         const newGrid = await DepthFirstSearch.draw(toUpdate, cleanGrid, speed);
 
-        return [newGrid, 0];
+        return [newGrid, steps];
     }
 }
