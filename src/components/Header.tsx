@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useState} from "react";
-import {Button, Divider, Select, Space, Tag, Typography} from "antd";
+import {Button, Divider, Select, Space, Typography} from "antd";
 import {GithubOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
