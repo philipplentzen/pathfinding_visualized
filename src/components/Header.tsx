@@ -1,6 +1,6 @@
 import React, {useCallback, useContext, useState} from "react";
-import {Button, Divider, Select, Space, Typography} from "antd";
-import {InfoCircleOutlined} from "@ant-design/icons";
+import {Button, Divider, Select, Space, Tag, Typography} from "antd";
+import {GithubOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {PathfindingAlgorithms} from "../types/PathfindingAlgorithms";
 import {AlgorithmContext} from "./Context/AlgoirthmContext";
@@ -26,6 +26,10 @@ const HeaderContainer = styled.header`
     border-bottom: var(--border);
 `
 
+const GithubLink = styled.a`
+  font-size: 24px;
+`
+
 export const Header: React.FunctionComponent<IHeaderProps> = ({onClickRunPathfinding}) => {
     const [algorithm, setAlgorithm] = useState<PathfindingAlgorithms | undefined>(undefined);
     const {isRunnable, isRunning} = useContext(AlgorithmContext);
@@ -41,7 +45,14 @@ export const Header: React.FunctionComponent<IHeaderProps> = ({onClickRunPathfin
 
     return (
         <HeaderContainer>
-            <Typography.Title level={3} style={{marginBottom: 0}}>Pathfinding Visualized</Typography.Title>
+            <Space split={<Divider type="vertical" />}>
+                <Typography.Title level={3} style={{marginBottom: 0}}>
+                    Pathfinding Visualized
+                </Typography.Title>
+                <GithubLink href="https://github.com/philipplentzen/pathfinding_visualized" target="_blank">
+                    <GithubOutlined />
+                </GithubLink>
+            </Space>
             <Space split={<Divider type="vertical" />}>
                 <div>
                     <Button type="text"

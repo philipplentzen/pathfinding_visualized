@@ -1,8 +1,10 @@
 {
   "name": "pathfinding_visualized",
-  "version": "0.1.0",
-  "private": true,
+  "homepage": "https://pathfinding.philipplentzen.dev",
+  "version": "1.0.0",
+  "private": false,
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.0",

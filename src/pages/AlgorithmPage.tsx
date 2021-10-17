@@ -21,7 +21,7 @@ export const AlgorithmPage: React.FunctionComponent<IAlgorithmPageProps> = () =>
     const [settings, setSettings] = useState<ISettings>({
         shown: false,
         pixelSize: 32,
-        legendShown: false,
+        legendShown: true,
         speed: 0,
     });
     const [isRunnable, setIsRunnable] = useState(false);
